@@ -331,7 +331,7 @@ class Car extends Collidable{
       }
 
       turnRight(factor){
-      		if(this.stopped){
+      		if(this.stopped || this.vel == 0){
       			return;
       		}
             var change;
@@ -350,7 +350,7 @@ class Car extends Collidable{
       }
 
       turnLeft(factor){
-      	    if(this.stopped){
+      	    if(this.stopped || this.vel == 0){
       	    	return;
       	    }
             var change
