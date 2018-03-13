@@ -96,7 +96,6 @@ class Polygon extends Collidable {
             for(var i = 1; i < this.sides; i++){
                   this.points.push(hex_corner(center,this.r,this.sides,i));
             }
-
       }
 }
 
@@ -118,6 +117,9 @@ class Car extends Collidable{
             this.MAXTURN = Math.PI / 4;
       }
 
+      json(){
+         return {'x':this.x,'y':this.y,'angle':this.angle,'id':this.id};
+      }
       go(){
       	this.stopped = false;
       }

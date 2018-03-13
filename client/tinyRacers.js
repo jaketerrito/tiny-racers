@@ -54,16 +54,16 @@ function canvasApp(){
    socket.on('initialize',init);
    function init(data){
       objects = data.objects;
-      cars = data.cars;
+      toCar(data.cars);
       drawScreen();
    }
    socket.on('crash',crash);
    function crash(data){
-      playSound("crash.mp3",1);
+      playSound("/client/crash.mp3",1);
    }
    socket.on('update',update);
    function update(data){
-      cars = data.cars;
+      toCar(data.cars);
       drawScreen();
    }
 
@@ -79,6 +79,13 @@ function canvasApp(){
    }
 }
 
+function toCar(list){
+   var temp = [];
+   for(car of list){
+      temp.push(new Car(car.x,car.y,car.angle,car.id));
+   }
+   cars = temp;
+}
 
 class Collidable {
       constructor(id){
@@ -105,6 +112,17 @@ class Collidable {
 }
 
 class Car extends Collidable{
+      constructor(x,y,angle,id){
+         this.x = x;
+         this.y = y;
+         this.angle = angle;
+         this.id = id;
+         this.width = 60;
+         this.height = this.width/2;
+         this.img = new Image();
+         this.img.src = "/client/car.png";
+      }
+
       draw(){
             context.save();
             context.translate(this.x,this.y);
