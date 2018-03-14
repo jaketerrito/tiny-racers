@@ -1,7 +1,7 @@
 //Program3
 //CSC 378
 //Jacob Territo
-
+var tickLength = Math.floor(1000/60);
 function checkKeys(car){
       for(var key in car.keyMap){
                if(car.keyMap[key] > 0){
@@ -99,6 +99,8 @@ class Polygon extends Collidable {
 class Car extends Collidable{
       constructor(x,y,id,socket){
             super(id);
+            this.speed = .5;
+            this.rotspeed = .5;
             this.keyMap = {};
             this.socket = socket;
             this.x = x;  //client needs
@@ -132,10 +134,10 @@ class Car extends Collidable{
 
       speedUp(){
             if(this.vel < this.MAXVEL){
-                  if(this.vel < .5){
-                        this.vel += .4;
+                  if(this.vel < .5*this.speed){
+                        this.vel += .4*this.speed;
                   } else {
-                        this.vel += .2;
+                        this.vel += .2*this.speed;
                   }
             }else{
                   this.vel = this.MAXVEL;
@@ -144,10 +146,10 @@ class Car extends Collidable{
 
       slowDown(){
             if(this.vel > -this.MAXVEL){
-                  if(this.vel > -.5){
-                        this.vel -= .4;
+                  if(this.vel > -.5*this.speed){
+                        this.vel -= .4*this.speed;
                   } else {
-                        this.vel -= .2;
+                        this.vel -= .2*this.speed;
                   }
             } else {
                   this.vel = -this.MAXVEL;
@@ -172,8 +174,8 @@ class Car extends Collidable{
       			return;
       		}
             var change;
-            if((2+factor**2) * Math.PI/180 < this.MAXTURN){
-                  change = (2+factor**2)*(Math.PI/180);
+            if((2+factor**2)*this.rotspeed * Math.PI/180 < this.MAXTURN){
+                  change = this.rotspeed*(2+factor**2)*(Math.PI/180);
             } else {
                   change = this.MAXTURN;
             }
@@ -191,8 +193,8 @@ class Car extends Collidable{
       	    	return;
       	    }
             var change
-            if((2+factor**2) * Math.PI/180 < this.MAXTURN){
-                  change = -(2+ factor**2)*(Math.PI/180);
+            if((2+factor**2)* this.rotspeed * Math.PI/180 < this.MAXTURN){
+                  change = -this.rotspeed*(2+ factor**2)*(Math.PI/180);
             } else {
                   change = -this.MAXTURN;
             }

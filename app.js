@@ -23,38 +23,71 @@ var cars = []
 var carList = [];
 
 io.on('connection',function(socket){
-   console.log("A user connected");
+   console.log("A user connected: " + socket.id);
+   socket.on('disconnect',onClientDisconnect);
    var car = new gameObjects.Car(100,100,socket.id,socket);
    cars.push(car);
    carList.push(car.json());
    socket.emit('initialize',{'objects':objects,'cars':carList});
    socket.on('keyDown', function (data) {
-       car.keyMap[data] = 1;
-       console.log("YA PRESSED A BUTTON");
+      console.log('running');
+      car.keyMap[data] = 1;
    });
    socket.on('keyUp', function (data) {
        car.keyMap[data] = 0;
    });
-}); 
+});
+
+function onClientDisconnect(data){
+   console.log("player disconnected: " + this.id);
+   var toRemove = removeCar(this.id);
+   if(toRemove){
+      cars.splice(cars.indexOf(toRemove),1);
+   }else{
+      console.log('attempting to remove nonexistant player');
+   }
+}
+var tickLength = Math.floor(1000/60);
+
+function removeCar(id){
+   for(car in cars){
+      if(car.id = id){
+         return car;
+      }
+   }
+   return null;
+}
 function gameLoop(){
-   setTimeout(gameLoop,50);
+   var startTime = new Date().getTime();
    var tempList = [];
    for(car of cars){
       gameObjects.checkKeys(car);
-      if(car.checkCollision(cars)){
+      collided = car.checkCollision(cars);
+      if(collided){
          car.crash();
+         collided.crash();
       }
       car.move();
+      car.go();
       tempList.push(car.json());
    }
    for(thing of objects){
       var collide = thing.checkCollision(cars);
       if(collide){
          collide.crash();
-         console.log("ya crashed");
       }
    }
    carList = tempList.slice();
    io.sockets.emit('update',{'cars':carList});
+   var tickTime = new Date().getTime() - startTime;
+   if(tickTime < 0){
+      tickTime = 0;
+   }
+   if(tickTime > tickLength){
+      console.log("dropping frame");
+      setTimeout(gameLoop,(Math.floor(tickTime/tickLength)+1)*tickLength-tickTime);
+   }else{
+      setTimeout(gameLoop,tickLength-tickTime);
+   }
 }
 gameLoop();
