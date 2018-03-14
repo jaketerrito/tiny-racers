@@ -57,27 +57,15 @@ function removeCar(id){
    }
    return null;
 }
+
 function gameLoop(){
    var startTime = new Date().getTime();
    var tempList = [];
+   var crashed = [];
    for(car of cars){
-      gameObjects.checkKeys(car);
-      collided = car.checkCollision(cars);
-      if(collided){
-         car.crash();
-         collided.crash();
-      }
-      car.move();
       car.go();
-      tempList.push(car.json());
-   }
-   for(thing of objects){
-      var collide = thing.checkCollision(cars);
-      if(collide){
-         collide.crash();
-      }
-   }
-   carList = tempList.slice();
+   } 
+   carList = gameObjects.carCollisions(cars,objects);
    io.sockets.emit('update',{'cars':carList});
    var tickTime = new Date().getTime() - startTime;
    if(tickTime < 0){

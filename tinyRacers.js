@@ -2,6 +2,31 @@
 //CSC 378
 //Jacob Territo
 var tickLength = Math.floor(1000/60);
+
+function carCollisions(cars,objects){
+   var tempList = []
+   for(var car of cars){
+      checkKeys(car);
+      collided = car.checkCollision(cars);
+      if(collided){
+         for(other of collided){
+            other.crash();
+            car.crash();
+         }
+      }
+      car.move();
+      tempList.push(car.json());
+   }
+   for(var thing of objects){
+      var collided = thing.checkCollision(cars);
+      if(collided){
+         for(var car of collided){
+            car.crash();
+         }
+      }
+   }
+   return tempList;
+}
 function checkKeys(car){
       for(var key in car.keyMap){
                if(car.keyMap[key] > 0){
@@ -64,19 +89,22 @@ class Collidable {
             this.id = id;
             this.points = [];
       }
-
       checkCollision(collidables){
+            var collided = [];
             for(var collidable of collidables){
                   if(collidable.id == this.id){
                         continue;
                   }
                   for(var point of collidable.points){
                         if(pointIn(this.points,point)){
-                              return collidable;
+                              collided.push(collidable);
                         }
                   }
             }
-            return null;
+            if(collided.length == 0){
+               return null;
+            }
+            return collided;
       }
 }
 
@@ -112,8 +140,8 @@ class Car extends Collidable{
             this.vel = 0;
             this.angle = 0; //client needs
             this.stopped = false;
-            this.MAXVEL = 12;
-            this.MAXTURN = Math.PI / 4;
+            this.MAXVEL = 12*this.speed;
+            this.MAXTURN = Math.PI / 4 * this.rotspeed;
       }
 
       json(){
@@ -211,7 +239,8 @@ class Car extends Collidable{
 module.exports =  {
    makeMap : makeMap,
    checkKeys: checkKeys,
-   Car: Car
+   Car: Car,
+   carCollisions: carCollisions
 
 
 }
