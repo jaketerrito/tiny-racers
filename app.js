@@ -27,7 +27,6 @@ io.on('connection',function(socket){
    socket.on('disconnect',onClientDisconnect);
    var car = new gameObjects.Car(100,100,socket.id,socket);
    cars.push(car);
-   console.log(car.id);
    carList.push(car.json());
    socket.emit('initialize',{'objects':objects,'cars':carList});
    socket.on('keyDown', function (data) {

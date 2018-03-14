@@ -72,7 +72,6 @@ function canvasApp(){
       for(thing of objects){
          thing.draw();
       }
-      console.log(cars);
       for(car of cars){
          car.draw();
       }
