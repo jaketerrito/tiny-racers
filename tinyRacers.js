@@ -73,6 +73,10 @@ function checkKeys(car){
 }
 
 function makeMap(objects){
+
+      var shape = new Collidable(1);
+      shape.points = [new Point(0,0), new Point(1000,0), new Point(1000,750), new Point(0,750),new Point(0,20),new Point(20,20),new Point(20,730),new Point(980,730),new Point(980,20),new Point(0,20)]
+      objects.push(shape);
       shape = new Polygon(400,375,200,6);
       objects.push(shape);
       shape = new Polygon(800,250,100,4);

@@ -52,7 +52,7 @@ function canvasApp(){
    socket.connect();
    socket.on('initialize',init);
    function init(data){
-      toPoly(data.objects);
+      toObj(data.objects);
       toCar(data.cars);
       drawScreen();
    }
@@ -86,13 +86,19 @@ function toCar(list){
    cars = temp.slice();
 }
 
-function toPoly(list){
+function toObj(list){
    var temp = [];
-   for(thing of list){
-      temp.push(new Polygon(thing.x,thing.y,thing.r,thing.sides));
+   for(var points of list){
+      var thing = new Collidable(1);
+      thing.points = points;
+      /*for(var point of points){
+         thing.points.push(new Point(point.x,point.y));
+      }*/
+      temp.push(thing);
    }
    objects = temp.slice();
 }
+
 class Collidable {
       constructor(id){
             this.id = id;
@@ -115,25 +121,6 @@ class Collidable {
             context.fill();
             context.closePath();
       }
-}
-class Polygon extends Collidable {
-	constructor(x,y,r, sides){
-            super(1);
-            this.x = x;
-            this.y = y;
-            this.r = r;
-            this.sides = sides;
-            var center = new Point(this.x,this.y);
-            this.points.push(hex_corner(center,this.r,this.sides,0));
-            for(var i = 1; i < this.sides; i++){
-                  this.points.push(hex_corner(center,this.r,this.sides,i));
-            }
-      }
-}
-function hex_corner(center, size, sides, i){
-            var angle_deg = 360/sides * i + 180/sides;
-            var angle_rad = Math.PI / 180 * angle_deg;
-            return new Point(center.x + size * Math.cos(angle_rad),center.y + size * Math.sin(angle_rad));
 }
 
 function Point(x,y){

@@ -16,7 +16,7 @@ var objects = []
 gameObjects.makeMap(objects)
 var objectList = [];
 for(thing of objects){
-   objectList.push({'x':thing.x,'y':thing.y,'r':thing.r,'sides':thing.sides});
+   objectList.push(thing.points);
 
 }
 var cars = []
@@ -28,7 +28,7 @@ io.on('connection',function(socket){
    var car = new gameObjects.Car(100,100,socket.id,socket);
    cars.push(car);
    carList.push(car.json());
-   socket.emit('initialize',{'objects':objects,'cars':carList});
+   socket.emit('initialize',{'objects':objectList,'cars':carList});
    socket.on('keyDown', function (data) {
       console.log('running');
       car.keyMap[data] = 1;
