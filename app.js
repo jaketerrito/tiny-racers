@@ -37,7 +37,7 @@ io.on('connection',function(socket){
    });
 }); 
 function gameLoop(){
-   setTimeout(gameLoop,100);
+   setTimeout(gameLoop,50);
    var tempList = [];
    for(car of cars){
       gameObjects.checkKeys(car);
