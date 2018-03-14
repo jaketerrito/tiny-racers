@@ -27,6 +27,7 @@ io.on('connection',function(socket){
    socket.on('disconnect',onClientDisconnect);
    var car = new gameObjects.Car(100,100,socket.id,socket);
    cars.push(car);
+   console.log(car.id);
    carList.push(car.json());
    socket.emit('initialize',{'objects':objects,'cars':carList});
    socket.on('keyDown', function (data) {
@@ -50,8 +51,8 @@ function onClientDisconnect(data){
 var tickLength = Math.floor(1000/60);
 
 function removeCar(id){
-   for(car in cars){
-      if(car.id = id){
+   for(car of cars){
+      if(car.id == id){
          return car;
       }
    }
@@ -62,9 +63,6 @@ function gameLoop(){
    var startTime = new Date().getTime();
    var tempList = [];
    var crashed = [];
-   for(car of cars){
-      car.go();
-   } 
    carList = gameObjects.carCollisions(cars,objects);
    io.sockets.emit('update',{'cars':carList});
    var tickTime = new Date().getTime() - startTime;

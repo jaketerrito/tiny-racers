@@ -3,27 +3,49 @@
 //Jacob Territo
 var tickLength = Math.floor(1000/60);
 
+function getCar(search,cars){
+   for(car of cars){
+      if(car.id == search.id){
+         return car;
+      }
+   }
+   return null;
+}
+
 function carCollisions(cars,objects){
    var tempList = []
-   for(var car of cars){
-      checkKeys(car);
-      collided = car.checkCollision(cars);
-      if(collided){
-         for(other of collided){
-            other.crash();
-            car.crash();
-         }
-      }
-      car.move();
-      tempList.push(car.json());
-   }
+   var crashed = [];
    for(var thing of objects){
       var collided = thing.checkCollision(cars);
       if(collided){
          for(var car of collided){
-            car.crash();
+            if(!getCar(car,crashed)){
+               crashed.push(car);
+            }
          }
       }
+   }
+
+   for(var car of cars){
+      var collided = car.checkCollision(cars);
+      if(collided){
+         for(other of collided){
+            if(!getCar(car,crashed)){
+               crashed.push(car);
+            }
+            if(!getCar(other,crashed)){
+               crashed.push(other);
+            }
+         }
+      }
+      if(getCar(car,crashed)){
+         car.crash();
+      }else{
+         car.go();
+      }
+      checkKeys(car);
+      car.move();
+      tempList.push(car.json());
    }
    return tempList;
 }
