@@ -3,7 +3,8 @@
 //Jacob Territo
 
 
-
+var objects = [];
+var cars = [];
 window.addEventListener('load', eventWindowLoaded, false);
 //event listener executes eventWindowLoaded once the canvas window is loaded.
 
@@ -49,11 +50,9 @@ function canvasApp(){
 
    var socket = io();
    socket.connect();
-   var objects = [];
-   var cars = [];
    socket.on('initialize',init);
    function init(data){
-      objects = data.objects;
+      toPoly(data.objects);
       toCar(data.cars);
       drawScreen();
    }
@@ -73,6 +72,7 @@ function canvasApp(){
       for(thing of objects){
          thing.draw();
       }
+      console.log(cars);
       for(car of cars){
          car.draw();
       }
@@ -84,9 +84,16 @@ function toCar(list){
    for(car of list){
       temp.push(new Car(car.x,car.y,car.angle,car.id));
    }
-   cars = temp;
+   cars = temp.slice();
 }
 
+function toPoly(list){
+   var temp = [];
+   for(thing of list){
+      temp.push(new Polygon(thing.x,thing.y,thing.r,thing.sides));
+   }
+   objects = temp.slice();
+}
 class Collidable {
       constructor(id){
             this.id = id;
@@ -110,9 +117,33 @@ class Collidable {
             context.closePath();
       }
 }
+class Polygon extends Collidable {
+	constructor(x,y,r, sides){
+            super(1);
+            this.x = x;
+            this.y = y;
+            this.r = r;
+            this.sides = sides;
+            var center = new Point(this.x,this.y);
+            this.points.push(hex_corner(center,this.r,this.sides,0));
+            for(var i = 1; i < this.sides; i++){
+                  this.points.push(hex_corner(center,this.r,this.sides,i));
+            }
+      }
+}
+function hex_corner(center, size, sides, i){
+            var angle_deg = 360/sides * i + 180/sides;
+            var angle_rad = Math.PI / 180 * angle_deg;
+            return new Point(center.x + size * Math.cos(angle_rad),center.y + size * Math.sin(angle_rad));
+}
 
+function Point(x,y){
+      this.x = x;
+      this.y = y;
+}
 class Car extends Collidable{
       constructor(x,y,angle,id){
+         super(id);
          this.x = x;
          this.y = y;
          this.angle = angle;

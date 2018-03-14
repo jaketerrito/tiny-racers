@@ -14,6 +14,11 @@ var io = require('socket.io')(serv,{});
 
 var objects = []
 gameObjects.makeMap(objects)
+var objectList = [];
+for(thing of objects){
+   objectList.push({'x':thing.x,'y':thing.y,'r':thing.r,'sides':thing.sides});
+
+}
 var cars = []
 var carList = [];
 
@@ -21,6 +26,7 @@ io.on('connection',function(socket){
    console.log("A user connected");
    var car = new gameObjects.Car(100,100,socket.id,socket);
    cars.push(car);
+   carList.push(car.json());
    socket.emit('initialize',{'objects':objects,'cars':carList});
    socket.on('keyDown', function (data) {
        car.keyMap[data] = 1;
@@ -29,23 +35,26 @@ io.on('connection',function(socket){
    socket.on('keyUp', function (data) {
        car.keyMap[data] = 0;
    });
-   console.log(cars);
-});
-function carList(){
-   var list = [];
-}
+}); 
 function gameLoop(){
    setTimeout(gameLoop,100);
-   tempList = [];
+   var tempList = [];
    for(car of cars){
       gameObjects.checkKeys(car);
-      car.move();
-      if(car.checkCollision(objects) || car.checkCollision(cars)){
+      if(car.checkCollision(cars)){
          car.crash();
       }
+      car.move();
       tempList.push(car.json());
    }
-   carList = tempList
+   for(thing of objects){
+      var collide = thing.checkCollision(cars);
+      if(collide){
+         collide.crash();
+         console.log("ya crashed");
+      }
+   }
+   carList = tempList.slice();
    io.sockets.emit('update',{'cars':carList});
-   gameObjects.checkKeys();
 }
+gameLoop();

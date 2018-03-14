@@ -3,9 +3,9 @@
 //Jacob Territo
 
 function checkKeys(car){
-      for(var key in keyMap){
-               if(keyMap[key] > 0){
-                     keyMap[key]+= 1/30;
+      for(var key in car.keyMap){
+               if(car.keyMap[key] > 0){
+                     car.keyMap[key]+= 1/30;
                      if(key == 38){
                            car.speedUp();
                      }
@@ -13,10 +13,10 @@ function checkKeys(car){
                            car.slowDown();
                      }  
                      if(key == 37){
-                           car.turnLeft(keyMap[key]);
+                           car.turnLeft(car.keyMap[key]);
                      }
                      if(key == 39){
-                           car.turnRight(keyMap[key]);
+                           car.turnRight(car.keyMap[key]);
                      }
                      if(key == 32){
                            car.stop();
@@ -26,20 +26,17 @@ function checkKeys(car){
 }
 
 function makeMap(objects){
-      var shape = new Collidable(1);
-      shape.points = [new Point(0,0), new Point(1000,0), new Point(1000,750), new Point(0,750),new Point(0,20),new Point(20,20),new Point(20,730),new Point(980,730),new Point(980,20),new Point(0,20)]
+      shape = new Polygon(400,375,200,6);
       objects.push(shape);
-      shape = new Polygon(400,375,200,6,1);
+      shape = new Polygon(800,250,100,4);
       objects.push(shape);
-      shape = new Polygon(800,250,100,4,1);
+      shape = new Polygon(550,200,100,4);
       objects.push(shape);
-      shape = new Polygon(550,200,100,4,1);
+      shape = new Polygon(950,250,100,4);
       objects.push(shape);
-      shape = new Polygon(950,250,100,4,1);
+      shape = new Polygon(600,550,100,4);
       objects.push(shape);
-      shape = new Polygon(600,550,100,4,1);
-      objects.push(shape);
-      shape = new Polygon(750,550,100,4,1);
+      shape = new Polygon(750,550,100,4);
       objects.push(shape);
 }
 
@@ -85,8 +82,8 @@ class Collidable {
 
 class Polygon extends Collidable {
       //polygons, with array of points relative to center, and same collision detection as in polyhunt, rotate updates the points about center
-      constructor(x,y,r, sides,id){
-            super(id);
+      constructor(x,y,r, sides){
+            super(0);
             this.x = x;
             this.y = y;
             this.r = r;
@@ -165,7 +162,7 @@ class Car extends Collidable{
       crash(){
       	    this.vel = 0;
       		if(!this.stopped){
-                     socket.emit('crash',{});
+                     this.socket.emit('crash',{});
       		}
             this.stopped = true;
       }
