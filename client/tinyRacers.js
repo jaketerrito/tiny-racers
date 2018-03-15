@@ -23,21 +23,27 @@ function canvasApp(){
 
    function redraw(){
          context.strokeStyle = 'blue';
-	     context.lineWidth = '5';
-		 context.strokeRect(0, 0, window.innerWidth, window.innerHeight);
-	}
+	 context.lineWidth = '5';
+	 context.strokeRect(0, 0, window.innerWidth, window.innerHeight);
+   }
 		
-	function resizeCanvas() {
-	      theCanvas.width = window.innerWidth;
-	      if(theCanvas.width * (3/4) > window.innerHeight){
-	      	theCanvas.width = window.innerHeight * (4/3);
-	      	theCanvas.height = window.innerHeight;
-	      }else{
-	      	theCanvas.height = theCanvas.width*(3/4);
-	      }
-	      context.scale(theCanvas.width/1000,theCanvas.height/750);
-		  redraw();
-	}
+   function resizeCanvas() {
+	 theCanvas.width = window.innerWidth;
+	 if(theCanvas.width * (3/4) > window.innerHeight){
+	    theCanvas.width = window.innerHeight * (4/3);
+	    theCanvas.height = window.innerHeight;
+	 }else{
+	    theCanvas.height = theCanvas.width*(3/4);
+	 }
+	 context.scale(theCanvas.width/1000,theCanvas.height/750);
+	 redraw();
+   }
+
+   theCanvas.addEventListener("mousedown",onmousedown,false);
+   function onmousedown(e) {
+         console.log(e.x + " "+  e.y);
+   }
+
 
    window.addEventListener('keydown',onKeyDown);
    function onKeyDown(e){
@@ -66,9 +72,10 @@ function canvasApp(){
       drawScreen();
    }
 
+   var background = new Image();
+   background.src = "/client/track.jpeg";
    function drawScreen(){
-      context.fillStyle = 'grey';
-      context.fillRect(0,0,1000,750);
+      context.drawImage(background,-50,-50,1100,850);
       for(thing of objects){
          thing.draw();
       }
@@ -107,7 +114,7 @@ class Collidable {
 
       draw(){
             var outline = 'grey';
-            var color = 'black';
+            var color = 'rgba(0,0,0,.2)';
             context.beginPath();
             context.strokeStyle = outline; 
             context.fillStyle = color;
@@ -134,7 +141,7 @@ class Car extends Collidable{
          this.y = y;
          this.angle = angle;
          this.id = id;
-         this.width = 60;
+         this.width = 40;
          this.height = this.width/2;
          this.img = new Image();
          this.img.src = "/client/car.png";
