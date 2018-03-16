@@ -232,13 +232,9 @@ class Car extends Collidable{
 
       slowDown(){
             if(this.vel > -this.MAXVEL){
-                  if(this.vel > -.5*this.speed){
-                        this.vel -= .4*this.speed;
-                  } else {
-                        this.vel -= .2*this.speed;
-                  }
+               this.vel -= .2*this.speed;
             } else {
-                  this.vel = -this.MAXVEL;
+               this.vel = -this.MAXVEL;
             }
       }
 
