@@ -183,7 +183,7 @@ class Car extends Collidable{
             this.vel = 0;
             this.angle = 0; //client needs
             this.stopped = false;
-            this.MAXVEL = 12*this.speed;
+            this.MAXVEL = 15*this.speed;
             this.MAXTURN = Math.PI / 36 * this.rotspeed;
       }
 
