@@ -175,7 +175,7 @@ class Car extends Collidable{
             this.socket = socket;
             this.x = x;  //client needs
             this.y = y;  //client needs
-            this.width = 40;
+            this.width = 30;
             this.height = this.width/2;
             this.pointoffsets = [new Point(-this.width/2,-this.height/2+5),new Point(-this.width/2,0),new Point(-this.width/2,this.height/2-5),new Point(0,this.height/2-5),new Point(this.width/2,this.height/2-5),new Point(this.width/2,0),new Point(this.width/2,-this.height/2+5),new Point(0,-this.height+5)];
             this.points = [];

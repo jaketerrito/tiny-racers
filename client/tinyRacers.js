@@ -99,7 +99,7 @@ class Car{
          this.y = y;
          this.angle = angle;
          this.id = id;
-         this.width = 40;
+         this.width = 30;
          this.height = this.width/2;
          this.img = new Image();
          this.img.src = "/client/car.png";
