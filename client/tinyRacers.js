@@ -3,7 +3,6 @@
 //Jacob Territo
 
 
-var objects = [];
 var cars = [];
 window.addEventListener('load', eventWindowLoaded, false);
 //event listener executes eventWindowLoaded once the canvas window is loaded.
@@ -58,8 +57,7 @@ function canvasApp(){
    socket.connect();
    socket.on('initialize',init);
    function init(data){
-      toObj(data.objects);
-      toCar(data.cars);
+      toCar(data);
       drawScreen();
    }
    socket.on('crash',crash);
@@ -76,9 +74,6 @@ function canvasApp(){
    background.src = "/client/track.jpeg";
    function drawScreen(){
       context.drawImage(background,-50,-50,1100,850);
-      for(thing of objects){
-         thing.draw();
-      }
       for(car of cars){
          car.draw();
       }
@@ -93,50 +88,13 @@ function toCar(list){
    cars = temp.slice();
 }
 
-function toObj(list){
-   var temp = [];
-   for(var points of list){
-      var thing = new Collidable(1);
-      thing.points = points;
-      /*for(var point of points){
-         thing.points.push(new Point(point.x,point.y));
-      }*/
-      temp.push(thing);
-   }
-   objects = temp.slice();
-}
-
-class Collidable {
-      constructor(id){
-            this.id = id;
-            this.points = [];
-      }
-
-      draw(){
-            var outline = 'grey';
-            var color = 'rgba(0,0,0,.2)';
-            context.beginPath();
-            context.strokeStyle = outline; 
-            context.fillStyle = color;
-            context.lineWidth=2;
-            context.moveTo(this.points[0].x,this.points[0].y);
-            for(var i = 1; i < this.points.length; i ++){ 
-                  context.lineTo(this.points[i].x,this.points[i].y);
-            } 
-            context.lineTo(this.points[0].x,this.points[0].y);
-            context.stroke(); 
-            context.fill();
-            context.closePath();
-      }
-}
-
 function Point(x,y){
       this.x = x;
       this.y = y;
 }
-class Car extends Collidable{
+class Car{
       constructor(x,y,angle,id){
-         super(id);
+         this.id = id;
          this.x = x;
          this.y = y;
          this.angle = angle;

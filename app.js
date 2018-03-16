@@ -14,10 +14,10 @@ var io = require('socket.io')(serv,{});
 
 var objects = []
 gameObjects.makeMap(objects)
-var objectList = [];
-for(thing of objects){
-   objectList.push(thing.points);
-}
+//var objectList = [];
+//for(thing of objects){
+//   objectList.push(thing.points);
+//}
 var cars = []
 var carList = [];
 
@@ -27,12 +27,13 @@ io.on('connection',function(socket){
    var car = new gameObjects.makeCar(cars,socket.id,socket);
    cars.push(car);
    carList.push(car.json());
-   socket.emit('initialize',{'objects':objectList,'cars':carList});
+   //socket.emit('initialize',{'objects':objectList,'cars':carList});
+   socket.emit('initialize',carList);
    socket.on('keyDown', function (data) {
-      console.log('running');
       car.keyMap[data] = 1;
    });
    socket.on('keyUp', function (data) {
+       car.lastMove = new Date().getTime();
        car.keyMap[data] = 0;
    });
 });
