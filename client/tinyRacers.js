@@ -41,7 +41,7 @@ function canvasApp(){
 
    theCanvas.addEventListener("mousedown",onmousedown,false);
    function onmousedown(e) {
-         console.log(e.x + " "+  e.y);
+         console.log("new Point("+e.x+","+e.y+"),");
    }
 
 

@@ -17,7 +17,6 @@ gameObjects.makeMap(objects)
 var objectList = [];
 for(thing of objects){
    objectList.push(thing.points);
-
 }
 var cars = []
 var carList = [];
@@ -25,7 +24,7 @@ var carList = [];
 io.on('connection',function(socket){
    console.log("A user connected: " + socket.id);
    socket.on('disconnect',onClientDisconnect);
-   var car = new gameObjects.Car(100,100,socket.id,socket);
+   var car = new gameObjects.makeCar(cars,socket.id,socket);
    cars.push(car);
    carList.push(car.json());
    socket.emit('initialize',{'objects':objectList,'cars':carList});
@@ -62,7 +61,7 @@ function gameLoop(){
    var startTime = new Date().getTime();
    var tempList = [];
    var crashed = [];
-   carList = gameObjects.carCollisions(cars,objects);
+   carList = gameObjects.updateWorld(cars,objects);
    io.sockets.emit('update',{'cars':carList});
    var tickTime = new Date().getTime() - startTime;
    if(tickTime < 0){
