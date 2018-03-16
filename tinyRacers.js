@@ -59,10 +59,11 @@ function checkKeys(car){
                      car.keyMap[key]+= 1/30;
                      if(key == 38){
                            car.speedUp();
-                     }
-                     if(key == 40){
+                     }else if(key == 40){
                            car.slowDown();
-                     }  
+                     }else{
+                           car.coast();
+                     }
                      if(key == 37){
                            car.turnLeft(car.keyMap[key]);
                      }
@@ -87,7 +88,7 @@ function makeMap(objects){
       objects.push(shape);
       //outer rim
       shape = new Collidable(1);
-      shape.points = [new Point(47,237),new Point(57,275),new Point(73,309),new Point(122,347),new Point(170,360),new Point(531,359),new Point(558,370),new Point(573,391),new Point(572,404),new Point(558,424),new Point(538,433),new Point(183,431),new Point(142,436),new Point(106,455),new Point(77,482),new Point(56,515),new Point(48,552),new Point(54,592),new Point(74,628),new Point(101,657),new Point(139,673),new Point(178,676),new Point(800,679),new Point(839,673),new Point(875,654),new Point(905,627),new Point(925,594),new Point(930,563),new Point(929,221),new Point(914,181),new Point(887,151),new Point(842,122),new Point(794,114),new Point(651,114),new Point(623,106),new Point(601,85),new Point(548,50),new Point(491,32),new Point(438,44),new Point(411,64),new Point(380,84),new Point(349,110),new Point(352,4),new Point(999,4),new Point(965,698),new Point(46,714),new Point(8,613)];
+      shape.points = [new Point(19,219),new Point(47,237),new Point(57,275),new Point(73,309),new Point(122,347),new Point(170,360),new Point(531,359),new Point(558,370),new Point(573,391),new Point(572,404),new Point(558,424),new Point(538,433),new Point(183,431),new Point(142,436),new Point(106,455),new Point(77,482),new Point(56,515),new Point(48,552),new Point(54,592),new Point(74,628),new Point(101,657),new Point(139,673),new Point(178,676),new Point(800,679),new Point(839,673),new Point(875,654),new Point(905,627),new Point(925,594),new Point(930,563),new Point(929,221),new Point(914,181),new Point(887,151),new Point(842,122),new Point(794,114),new Point(651,114),new Point(623,106),new Point(601,85),new Point(548,50),new Point(491,32),new Point(438,44),new Point(411,64),new Point(380,84),new Point(349,110),new Point(352,4),new Point(999,4),new Point(965,698),new Point(46,714),new Point(8,613)];
       objects.push(shape);
 }
 
@@ -168,8 +169,8 @@ class Car extends Collidable{
       constructor(x,y,id,socket){
             super(id);
             this.lastMove = new Date().getTime(); 
-            this.speed = .5;
-            this.rotspeed = .5;
+            this.speed = .3;
+            this.rotspeed = .4;
             this.keyMap = {};
             this.socket = socket;
             this.x = x;  //client needs
@@ -183,7 +184,7 @@ class Car extends Collidable{
             this.angle = 0; //client needs
             this.stopped = false;
             this.MAXVEL = 12*this.speed;
-            this.MAXTURN = Math.PI / 4 * this.rotspeed;
+            this.MAXTURN = Math.PI / 36 * this.rotspeed;
       }
 
       setPoints(){
@@ -200,6 +201,14 @@ class Car extends Collidable{
       	this.stopped = false;
       }
 
+      coast(){
+         if(this.vel > 0){
+            this.vel -= .1 * this.speed;;
+         }
+         if(this.vel < 0){
+            this.vel += .1 *this.speed;
+         }
+      }
       move(){
             this.x += this.vel * Math.cos(this.angle);
             this.y += this.vel * Math.sin(this.angle);

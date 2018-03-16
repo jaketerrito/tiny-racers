@@ -71,7 +71,7 @@ function canvasApp(){
    }
 
    var background = new Image();
-   background.src = "/client/track.jpeg";
+   background.src = "/client/track.jpg";
    function drawScreen(){
       context.drawImage(background,-50,-50,1100,850);
       for(car of cars){
