@@ -2,6 +2,8 @@ var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
 var gameObjects = require('./tinyRacers.js');
+var aiObjects = require('./aiObjects.js');
+
 app.get('/',function(req, res) {
 	res.sendFile(__dirname + '/client/tinyRacers.html');
 });
@@ -20,9 +22,9 @@ gameObjects.makeMap(objects)
 //}
 var cars = []
 var carList = [];
-
+var comps = [];
 io.on('connection',function(socket){
-   console.log("A user connected: " + socket.id);
+   //console.log("A user connected: " + socket.id);
    socket.on('disconnect',onClientDisconnect);
    var car = new gameObjects.makeCar(cars,socket.id,socket);
    cars.push(car);
@@ -33,18 +35,23 @@ io.on('connection',function(socket){
       car.keyMap[data] = 1;
    });
    socket.on('keyUp', function (data) {
-       car.lastMove = new Date().getTime();
-       car.keyMap[data] = 0;
+      if(data == 80){
+         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000,null));
+         cars.push(AI.car);
+         comps.push(AI);
+      }
+      car.lastMove = new Date().getTime();
+      car.keyMap[data] = 0;
    });
 });
 
 function onClientDisconnect(data){
-   console.log("player disconnected: " + this.id);
+   //console.log("player disconnected: " + this.id);
    var toRemove = removeCar(this.id);
    if(toRemove){
       cars.splice(cars.indexOf(toRemove),1);
    }else{
-      console.log('attempting to remove nonexistant player');
+      //console.log('attempting to remove nonexistant player');
    }
 }
 var tickLength = Math.floor(1000/60);
@@ -73,6 +80,21 @@ function gameLoop(){
       setTimeout(gameLoop,(Math.floor(tickTime/tickLength)+1)*tickLength-tickTime);
    }else{
       setTimeout(gameLoop,tickLength-tickTime);
+   }
+   if(comps.length < 1){
+      var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000,null));
+      cars.push(AI.car);
+      comps.push(AI);
+   }
+   for(var i = comps.length-1; i >= 0; i--){
+      if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 20000){
+         console.log(comps[i].car.travelled);
+         cars.splice(cars.indexOf(comps[i].car),1);
+         comps.splice(i,1);
+         continue;
+      }
+      comps[i].updateDistances(objects, cars);
+      comps[i].makeMove();
    }
 }
 gameLoop();

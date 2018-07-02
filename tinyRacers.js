@@ -28,7 +28,7 @@ function updateWorld(cars,objects){
 
    for(var car of cars){
       var collided = car.checkCollision(cars);
-      if(time-car.lastMove > 30000){
+      if(time-car.lastMove > 30000 && car.socket){
          car.socket.disconnect(true);
       }
       if(collided){
@@ -98,9 +98,11 @@ function hex_corner(center, size, sides, i){
             return new Point(center.x + size * Math.cos(angle_rad),center.y + size * Math.sin(angle_rad));
 }
 
-function Point(x,y){
+class Point {
+   constructor(x,y){
       this.x = x;
       this.y = y;
+   }
 }
 
 function pointIn(points,point){
@@ -119,14 +121,14 @@ class Collidable {
       checkCollision(collidables){
             var collided = [];
             for(var collidable of collidables){
-                  if(collidable.id == this.id){
-                        continue;
-                  }
-                  for(var point of collidable.points){
-                        if(pointIn(this.points,point)){
-                              collided.push(collidable);
-                        }
-                  }
+               if(collidable.id == this.id){
+                     continue;
+               }
+               for(var point of collidable.points){
+                     if(pointIn(this.points,point)){
+                           collided.push(collidable);
+                     }
+               }
             }
             if(collided.length == 0){
                return null;
@@ -185,6 +187,8 @@ class Car extends Collidable{
             this.stopped = false;
             this.MAXVEL = 15*this.speed;
             this.MAXTURN = Math.PI / 36 * this.rotspeed;
+            this.crashed;
+            this.travelled = 0;
       }
 
       setPoints(){
@@ -210,12 +214,13 @@ class Car extends Collidable{
          }
       }
       move(){
-            this.x += this.vel * Math.cos(this.angle);
-            this.y += this.vel * Math.sin(this.angle);
-            for(var point of this.points){
-                  point.x += this.vel * Math.cos(this.angle);
-                  point.y += this.vel * Math.sin(this.angle);
-            }
+         this.travelled += this.vel;
+         this.x += this.vel * Math.cos(this.angle);
+         this.y += this.vel * Math.sin(this.angle);
+         for(var point of this.points){
+               point.x += this.vel * Math.cos(this.angle);
+               point.y += this.vel * Math.sin(this.angle);
+         }
       }
 
       speedUp(){
@@ -245,9 +250,10 @@ class Car extends Collidable{
 
       crash(){
       	    this.vel = 0;
-      		if(!this.stopped){
+      		if(!this.stopped && this.socket){
                      this.socket.emit('crash',{});
       		}
+            this.crashed = true;
             this.stopped = true;
       }
 
@@ -295,7 +301,7 @@ module.exports =  {
    checkKeys: checkKeys,
    Car: Car,
    updateWorld: updateWorld,
-   makeCar: makeCar
-
-
+   makeCar: makeCar,
+   pointIn: pointIn,
+   Point: Point
 }
