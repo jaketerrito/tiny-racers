@@ -21,7 +21,7 @@ class AI {
       } else {
          this.car.slowDown();
       }
-      var turn = Math.random() - .5;
+      var turn = Math.random() * 2 - 1;
       if(turn > 0){
          this.car.turnLeft(turn);
       } else{

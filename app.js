@@ -48,6 +48,7 @@ io.on('connection',function(socket){
 function onClientDisconnect(data){
    //console.log("player disconnected: " + this.id);
    var toRemove = removeCar(this.id);
+   console.log(toRemove.travelled);
    if(toRemove){
       cars.splice(cars.indexOf(toRemove),1);
    }else{
@@ -64,6 +65,22 @@ function removeCar(id){
    }
    return null;
 }
+
+//Set up interaction with python script (AI)
+var spawn = require('child_process').spawn;
+var py = spawn('python3',['./NN/Run.py']);
+var input = [1,2,3,4,5,6];
+var output = '';
+
+py.stdout.on('data', function(data){
+  output += data.toString();
+  console.log(output);
+});
+py.stdout.on('end', function(){
+  console.log('py done urnnuin');
+});
+py.stdin.write(JSON.stringify(input));
+py.stdin.end();
 
 function gameLoop(){
    var startTime = new Date().getTime();
@@ -86,6 +103,7 @@ function gameLoop(){
       cars.push(AI.car);
       comps.push(AI);
    }
+
    for(var i = comps.length-1; i >= 0; i--){
       if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 20000){
          console.log(comps[i].car.travelled);
