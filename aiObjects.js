@@ -57,7 +57,7 @@ class AI {
                   done = true;
                }
             }
-            this.distances[i] = d;
+            this.distances[i] = d - 500;
             if(d > 500){
                done = true;
             }

@@ -68,7 +68,7 @@ function removeCar(id){
 
 //Set up interaction with python script (AI)
 var spawn = require('child_process').spawn;
-var py = spawn('python3',['./NN/Run.py']);
+var py = spawn('python3',['./NN/Run.py','./NN/test.cfg']);
 var input = [1,2,3,4,5,6];
 var output = '';
 
