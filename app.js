@@ -35,11 +35,11 @@ io.on('connection',function(socket){
       car.keyMap[data] = 1;
    });
    socket.on('keyUp', function (data) {
-      if(data == 80){
+      /*if(data == 80){
          var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000,null));
          cars.push(AI.car);
          comps.push(AI);
-      }
+      }*/
       car.lastMove = new Date().getTime();
       car.keyMap[data] = 0;
    });
@@ -66,21 +66,17 @@ function removeCar(id){
    return null;
 }
 
-//Set up interaction with python script (AI)
+//put this in the ai itself. ai passes weights to neural net and keeps population list of different organisms(as json objs)
+//need to set up way to send and ssave weights
+
+//uses this script in order to share environment and get responses within ai
 var spawn = require('child_process').spawn;
 var py = spawn('python3',['./NN/Run.py','./NN/test.cfg']);
-var input = [1,2,3,4,5,6];
-var output = '';
-
 py.stdout.on('data', function(data){
-  output += data.toString();
-  console.log(output);
+   print("here it will make movement based off nn input");
 });
-py.stdout.on('end', function(){
-  console.log('py done urnnuin');
-});
-py.stdin.write(JSON.stringify(input));
-py.stdin.end();
+py.stdin.write("send input to the nn");
+py.stdin.end("something probably went wrong");
 
 function gameLoop(){
    var startTime = new Date().getTime();
