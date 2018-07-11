@@ -47,7 +47,6 @@ class Layer:
 
 class Network:
     # arch -- list of (dim, act) pairs
-    # err -- error function: "cross_entropy" or "mse"
     # wgts -- list of one 2-d np.array per layer in arch
     def __init__(self, arch, wgts=None):
         self.layers = []
@@ -114,17 +113,17 @@ def main(cfg_file):
     else:
         organism = Organism(cfg['arch'])
 
-    i = 0
     for line in sys.stdin:
         # expects "score {score}" as final line
         if "score" in line:
             organism.score = int(line.split()[1])
-            print("Organism {}, score {}".format(i, organism.score))
-            i += 1
-            organism.mutate(0,0)
+            # here is where it would save results and config
+            return
         else:
             # line expected to be "[0,1,2,....]"
-            print(organism.react(np.array(json.loads(line))))
+            print(organism.react(np.array(json.loads(line[:-1]))))
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    print("Sript Started")
+    sys.stdout.flush()
+    main("NN/test.cfg")

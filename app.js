@@ -35,11 +35,11 @@ io.on('connection',function(socket){
       car.keyMap[data] = 1;
    });
    socket.on('keyUp', function (data) {
-      /*if(data == 80){
+      if(data == 80){
          var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000,null));
          cars.push(AI.car);
          comps.push(AI);
-      }*/
+      }
       car.lastMove = new Date().getTime();
       car.keyMap[data] = 0;
    });
@@ -66,18 +66,6 @@ function removeCar(id){
    return null;
 }
 
-//put this in the ai itself. ai passes weights to neural net and keeps population list of different organisms(as json objs)
-//need to set up way to send and ssave weights
-
-//uses this script in order to share environment and get responses within ai
-var spawn = require('child_process').spawn;
-var py = spawn('python3',['./NN/Run.py','./NN/test.cfg']);
-py.stdout.on('data', function(data){
-   print("here it will make movement based off nn input");
-});
-py.stdin.write("send input to the nn");
-py.stdin.end("something probably went wrong");
-
 function gameLoop(){
    var startTime = new Date().getTime();
    var tempList = [];
@@ -102,13 +90,12 @@ function gameLoop(){
 
    for(var i = comps.length-1; i >= 0; i--){
       if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 20000){
-         console.log(comps[i].car.travelled);
+         comps[i].score();
          cars.splice(cars.indexOf(comps[i].car),1);
          comps.splice(i,1);
          continue;
       }
-      comps[i].updateDistances(objects, cars);
-      comps[i].makeMove();
+      comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
    }
 }
 gameLoop();

@@ -1,4 +1,5 @@
 var gameObjects = require('./tinyRacers.js');
+var spawn = require('child_process').spawn;
 
 class AI {
    constructor(car){
@@ -8,9 +9,22 @@ class AI {
       for(var i = 0; i < this.views; i++){
          this.distances.push(500);
       }
+
+      this.py = spawn('python3',['./NN/Run.py']);
+      this.py.stdout.on('data', function(data){
+         this.makeMove(data);
+      });
+      this.py.stderr.on('data',function(data){
+         console.log("ERROR:" + data.toString());
+      });
+   }
+   
+   score(){
+      this.py.stdin.end("score " + this.car.travelled);
    }
 
-   makeMove(){
+   makeMove(data){
+      console.log(data);
       for(var distance of this.distances){
          if(distance < 50 && this.car.vel**2 > 4){
             this.car.stop();
@@ -63,6 +77,14 @@ class AI {
             }
          }
       }
+      this.py.stdin.write("[");
+      for(var i = 0; i < this.distances.length; i ++){
+         this.py.stdin.write("[" + this.distances[i] + "]");
+         if(i < this.distances.length -1){
+            this.py.stdin.write(',');
+         }
+      }
+      this.py.stdin.write("]\n");
    }
 }
 
