@@ -13,8 +13,6 @@ class AI {
       this.py.stdout.on('data', function(data){
          this.makeMove(data);
       }.bind(this));
-      //this is an unusable reference, needs to print to a stream that makeMove's picks up on.
-      //or maybe global var workes?
       this.py.stderr.on('data',function(data){
          console.log("ERROR:" + data.toString());
       });
@@ -22,10 +20,25 @@ class AI {
    
    score(){
       this.py.stdin.end("score " + this.car.travelled);
+      console.log(this.car.travelled);
    }
 
    makeMove(data){
-      console.log(data.toString());
+      var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
+      console.log(results);
+      if(results[0] > .7){
+         this.car.speedUp();
+      }
+      if(results[1] > .7){
+         this.car.slowDown(); 
+      }
+      if(results[2] > .7){
+         this.car.turnLeft(.1);
+      }
+      if(results[3] > .7){
+         this.car.turnRight(.1);
+      }
+      return;
       for(var distance of this.distances){
          if(distance < 50 && this.car.vel**2 > 4){
             this.car.stop();

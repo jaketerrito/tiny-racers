@@ -88,6 +88,8 @@ def get_function(form):
         return lambda z: (z > 0) * z
     elif(form == 'softmax'):
         return lambda z: np.exp(z) / np.sum(np.exp(z), axis=0)
+    elif(form == 'sigmoid'):
+        return lambda z: 1 / ( 1 + np.exp(-z))
 
 class Organism:
     def __init__(self, arch, parents = None, weights=None, score=None):
@@ -115,17 +117,14 @@ def main(cfg_file):
 
     for line in sys.stdin:
         # expects "score {score}" as final line
-        print(line)
         if "score" in line:
             organism.score = float(line.split()[1])
             # here is where it would save results and config
             return
         else:
             # line expected to be "[0,1,2,....]"
-            print(organism.react(np.array(json.loads(line[:-1]))))
+            print(organism.react(np.array(json.loads(line[:-1]))).flatten())
             sys.stdout.flush()
 
 if __name__ == '__main__':
-    print("Sript Started")
-    sys.stdout.flush()
     main("NN/test.cfg")
