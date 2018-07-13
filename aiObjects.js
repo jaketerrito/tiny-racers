@@ -9,11 +9,12 @@ class AI {
       for(var i = 0; i < this.views; i++){
          this.distances.push(500);
       }
-
       this.py = spawn('python3',['./NN/Run.py']);
       this.py.stdout.on('data', function(data){
          this.makeMove(data);
-      });
+      }.bind(this));
+      //this is an unusable reference, needs to print to a stream that makeMove's picks up on.
+      //or maybe global var workes?
       this.py.stderr.on('data',function(data){
          console.log("ERROR:" + data.toString());
       });
@@ -24,7 +25,7 @@ class AI {
    }
 
    makeMove(data){
-      console.log(data);
+      console.log(data.toString());
       for(var distance of this.distances){
          if(distance < 50 && this.car.vel**2 > 4){
             this.car.stop();

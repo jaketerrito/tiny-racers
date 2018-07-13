@@ -115,13 +115,15 @@ def main(cfg_file):
 
     for line in sys.stdin:
         # expects "score {score}" as final line
+        print(line)
         if "score" in line:
-            organism.score = int(line.split()[1])
+            organism.score = float(line.split()[1])
             # here is where it would save results and config
             return
         else:
             # line expected to be "[0,1,2,....]"
             print(organism.react(np.array(json.loads(line[:-1]))))
+            sys.stdout.flush()
 
 if __name__ == '__main__':
     print("Sript Started")
