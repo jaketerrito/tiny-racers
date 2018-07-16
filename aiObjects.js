@@ -26,16 +26,17 @@ class AI {
    makeMove(data){
       var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
       console.log(results);
-      if(results[0] > .7){
+      var thresh = .99
+      if(results[0] > thresh){
          this.car.speedUp();
       }
-      if(results[1] > .7){
+      if(results[1] > thresh){
          this.car.slowDown(); 
       }
-      if(results[2] > .7){
+      if(results[2] > thresh){
          this.car.turnLeft(.1);
       }
-      if(results[3] > .7){
+      if(results[3] > thresh){
          this.car.turnRight(.1);
       }
       return;
@@ -85,12 +86,13 @@ class AI {
                   done = true;
                }
             }
-            this.distances[i] = d - 500;
+            this.distances[i] = d;
             if(d > 500){
                done = true;
             }
          }
       }
+      console.log(this.distances);
       this.py.stdin.write("[");
       for(var i = 0; i < this.distances.length; i ++){
          this.py.stdin.write("[" + this.distances[i] + "]");

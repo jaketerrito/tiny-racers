@@ -19,7 +19,7 @@ class Layer:
             self.in_weights = weights
         else:
             if(prev is not None):
-                self.in_weights = rnd.rand(dim,prev.dim+1)
+                self.in_weights = rnd.rand(dim,prev.dim+1) - .25
 
     def get_dim(self):
         return self.dim
@@ -77,7 +77,6 @@ class Network:
     # of final layer
     def predict(self, inputs):
         #normalize input
-        inputs = inputs/inputs.max()
         self.layers[0].propagate(vals=inputs)
         for layer in self.layers[1:]:
             layer.propagate()
@@ -104,7 +103,7 @@ class Organism:
         self.weights = self.net.set_weights()
 
     def react(self,inputs):
-        return self.net.predict(inputs)
+        return self.net.predict((500-inputs)/500.0)
 
 # Take's a config, a list of inputs, and outputs predictions. 
 def main(cfg_file):
