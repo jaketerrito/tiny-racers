@@ -1,7 +1,7 @@
 //Program3
 //CSC 378
 //Jacob Territo
-var tickLength = Math.floor(1000/60);
+var tickLength = Math.floor(1000/30);
 function getCar(search,cars){
    for(car of cars){
       if(car.id == search.id){
