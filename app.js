@@ -66,22 +66,6 @@ function removeCar(id){
    return null;
 }
 
-//Set up interaction with python script (AI)
-var spawn = require('child_process').spawn;
-var py = spawn('python3',['./NN/Run.py','./NN/test.cfg']);
-var input = [1,2,3,4,5,6];
-var output = '';
-
-py.stdout.on('data', function(data){
-  output += data.toString();
-  console.log(output);
-});
-py.stdout.on('end', function(){
-  console.log('py done urnnuin');
-});
-py.stdin.write(JSON.stringify(input));
-py.stdin.end();
-
 function gameLoop(){
    var startTime = new Date().getTime();
    var tempList = [];
@@ -106,13 +90,12 @@ function gameLoop(){
 
    for(var i = comps.length-1; i >= 0; i--){
       if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 20000){
-         console.log(comps[i].car.travelled);
+         comps[i].score();
          cars.splice(cars.indexOf(comps[i].car),1);
          comps.splice(i,1);
          continue;
       }
-      comps[i].updateDistances(objects, cars);
-      comps[i].makeMove();
+      comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
    }
 }
 gameLoop();

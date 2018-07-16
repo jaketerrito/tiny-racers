@@ -1,4 +1,5 @@
 var gameObjects = require('./tinyRacers.js');
+var spawn = require('child_process').spawn;
 
 class AI {
    constructor(car){
@@ -8,9 +9,37 @@ class AI {
       for(var i = 0; i < this.views; i++){
          this.distances.push(500);
       }
+      this.py = spawn('python3',['./NN/Run.py']);
+      this.py.stdout.on('data', function(data){
+         this.makeMove(data);
+      }.bind(this));
+      this.py.stderr.on('data',function(data){
+         console.log("ERROR:" + data.toString());
+      });
+   }
+   
+   score(){
+      this.py.stdin.end("score " + this.car.travelled);
+      console.log(this.car.travelled);
    }
 
-   makeMove(){
+   makeMove(data){
+      var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
+      console.log(results);
+      var thresh = .99
+      if(results[0] > thresh){
+         this.car.speedUp();
+      }
+      if(results[1] > thresh){
+         this.car.slowDown(); 
+      }
+      if(results[2] > thresh){
+         this.car.turnLeft(.1);
+      }
+      if(results[3] > thresh){
+         this.car.turnRight(.1);
+      }
+      return;
       for(var distance of this.distances){
          if(distance < 50 && this.car.vel**2 > 4){
             this.car.stop();
@@ -57,12 +86,21 @@ class AI {
                   done = true;
                }
             }
-            this.distances[i] = d - 500;
+            this.distances[i] = d;
             if(d > 500){
                done = true;
             }
          }
       }
+      console.log(this.distances);
+      this.py.stdin.write("[");
+      for(var i = 0; i < this.distances.length; i ++){
+         this.py.stdin.write("[" + this.distances[i] + "]");
+         if(i < this.distances.length -1){
+            this.py.stdin.write(',');
+         }
+      }
+      this.py.stdin.write("]\n");
    }
 }
 

@@ -19,7 +19,7 @@ class Layer:
             self.in_weights = weights
         else:
             if(prev is not None):
-                self.in_weights = rnd.rand(dim,prev.dim+1)
+                self.in_weights = rnd.rand(dim,prev.dim+1) - .25
 
     def get_dim(self):
         return self.dim
@@ -47,7 +47,6 @@ class Layer:
 
 class Network:
     # arch -- list of (dim, act) pairs
-    # err -- error function: "cross_entropy" or "mse"
     # wgts -- list of one 2-d np.array per layer in arch
     def __init__(self, arch, wgts=None):
         self.layers = []
@@ -78,7 +77,6 @@ class Network:
     # of final layer
     def predict(self, inputs):
         #normalize input
-        inputs = inputs/inputs.max()
         self.layers[0].propagate(vals=inputs)
         for layer in self.layers[1:]:
             layer.propagate()
@@ -89,6 +87,8 @@ def get_function(form):
         return lambda z: (z > 0) * z
     elif(form == 'softmax'):
         return lambda z: np.exp(z) / np.sum(np.exp(z), axis=0)
+    elif(form == 'sigmoid'):
+        return lambda z: 1 / ( 1 + np.exp(-z))
 
 class Organism:
     def __init__(self, arch, parents = None, weights=None, score=None):
@@ -103,7 +103,7 @@ class Organism:
         self.weights = self.net.set_weights()
 
     def react(self,inputs):
-        return self.net.predict(inputs)
+        return self.net.predict((500-inputs)/500.0)
 
 # Take's a config, a list of inputs, and outputs predictions. 
 def main(cfg_file):
@@ -114,17 +114,16 @@ def main(cfg_file):
     else:
         organism = Organism(cfg['arch'])
 
-    i = 0
     for line in sys.stdin:
         # expects "score {score}" as final line
         if "score" in line:
-            organism.score = int(line.split()[1])
-            print("Organism {}, score {}".format(i, organism.score))
-            i += 1
-            organism.mutate(0,0)
+            organism.score = float(line.split()[1])
+            # here is where it would save results and config
+            return
         else:
             # line expected to be "[0,1,2,....]"
-            print(organism.react(np.array(json.loads(line))))
+            print(organism.react(np.array(json.loads(line[:-1]))).flatten())
+            sys.stdout.flush()
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main("NN/test.cfg")
