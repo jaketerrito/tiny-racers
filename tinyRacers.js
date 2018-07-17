@@ -189,6 +189,7 @@ class Car extends Collidable{
             this.MAXTURN = Math.PI / 36 * this.rotspeed;
             this.crashed;
             this.travelled = 0;
+            this.birth = new Date().getTime()
       }
 
       setPoints(){

@@ -19,14 +19,14 @@ class AI {
    }
    
    score(){
-      this.py.stdin.end("score " + this.car.travelled);
+      this.py.stdin.end("score " + this.car.travelled + "," + (new Date().getTime() - this.car.birth));
       console.log(this.car.travelled);
    }
 
    makeMove(data){
       var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
       console.log(results);
-      var thresh = .99
+      var thresh = .5
       if(results[0] > thresh){
          this.car.speedUp();
       }
@@ -96,11 +96,11 @@ class AI {
       this.py.stdin.write("[");
       for(var i = 0; i < this.distances.length; i ++){
          this.py.stdin.write("[" + this.distances[i] + "]");
-         if(i < this.distances.length -1){
-            this.py.stdin.write(',');
-         }
+         this.py.stdin.write(',');
       }
+      this.py.stdin.write("[" + this.car.vel + "]");
       this.py.stdin.write("]\n");
+      //NN needs input of size = this.views + 1 (for vel)
    }
 }
 
