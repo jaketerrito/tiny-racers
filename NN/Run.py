@@ -131,7 +131,7 @@ def main(cfg_file):
         if "score" in line:
             organism.distance = float(line.split()[1].split(',')[0])
             organism.time = float(line.split()[1].split(',')[1])
-            with open("/data/" + str(organism.time) + "-" + str(organism.distance) + ".cfg",'w') as file:
+            with open("data/" + str(organism.time) + "-" + str(organism.distance) + ".cfg",'w') as file:
                 data = {}
                 data['arch'] = cfg['arch']
                 data['wgts'] = organism.net.get_weights()
@@ -142,4 +142,4 @@ def main(cfg_file):
             sys.stdout.flush()
 
 if __name__ == '__main__':
-    main("test.cfg")
+    main("NN/test.cfg")
