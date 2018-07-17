@@ -30,6 +30,11 @@ class Layer:
         self.in_weights = weights
         return self.in_weights
 
+    def get_weights(self):
+        if self.in_weights is None:
+            return None
+        return self.in_weights.tolist()
+
     # Compute self.outputs, using vals if given, else using outputs from
     # previous layer and passing through our in_weights and activation.
     def propagate(self, vals=None):
@@ -43,9 +48,6 @@ class Layer:
         inputs = np.vstack((inputs,1))
         self.zs = np.dot(self.in_weights, inputs)
         self.outputs = self.act(self.zs)
-
-    def toText(self):
-        return np.array_str(self.in_weights())
 
 
 class Network:
@@ -85,11 +87,12 @@ class Network:
             layer.propagate()
         return self.layers[-1].outputs
 
-    def toText(self):
-        text = ""
-        for layer in self.layers:
-            text += layer.toText() + "\n"
-        return text
+    def get_weights(self):
+        weights = []
+        for layer in self.layers[1:]:
+            weights.append(layer.get_weights())
+        return weights
+
 
 def get_function(form):
     if(form == 'relu'):
@@ -128,8 +131,11 @@ def main(cfg_file):
         if "score" in line:
             organism.distance = float(line.split()[1].split(',')[0])
             organism.time = float(line.split()[1].split(',')[1])
-            with open("time" + str(organism.time) + ".cfg" ) as file:
-                file.write(organism.net.toText())
+            with open("time" + str(organism.time) + ".cfg",'w') as file:
+                data = {}
+                data['arch'] = cfg['arch']
+                data['wgts'] = organism.net.get_weights()
+                json.dump(data,file,indent=4)
         else:
             # line expected to be "[0,1,2,....]"
             print(organism.react(np.array(json.loads(line[:-1]))).flatten())

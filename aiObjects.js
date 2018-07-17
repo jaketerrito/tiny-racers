@@ -20,12 +20,11 @@ class AI {
    
    score(){
       this.py.stdin.end("score " + this.car.travelled + "," + (new Date().getTime() - this.car.birth));
-      console.log(this.car.travelled);
+      console.log(this.car.travelled + " " + (new Date().getTime() - this.car.birth) );
    }
 
    makeMove(data){
       var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
-      console.log(results);
       var thresh = .5
       if(results[0] > thresh){
          this.car.speedUp();
@@ -92,7 +91,6 @@ class AI {
             }
          }
       }
-      console.log(this.distances);
       this.py.stdin.write("[");
       for(var i = 0; i < this.distances.length; i ++){
          this.py.stdin.write("[" + this.distances[i] + "]");
