@@ -44,6 +44,9 @@ class Layer:
         self.zs = np.dot(self.in_weights, inputs)
         self.outputs = self.act(self.zs)
 
+    def toText(self):
+        return np.array_str(self.in_weights())
+
 
 class Network:
     # arch -- list of (dim, act) pairs
@@ -82,6 +85,12 @@ class Network:
             layer.propagate()
         return self.layers[-1].outputs
 
+    def toText(self):
+        text = ""
+        for layer in self.layers:
+            text += layer.toText() + "\n"
+        return text
+
 def get_function(form):
     if(form == 'relu'):
         return lambda z: (z > 0) * z
@@ -117,9 +126,10 @@ def main(cfg_file):
     for line in sys.stdin:
         # expects "score {score}" as final line
         if "score" in line:
-            organism.score = float(line.split()[1])
-            # here is where it would save results and config
-            return
+            organism.distance = float(line.split()[1].split(',')[0])
+            organism.time = float(line.split()[1].split(',')[1])
+            with open("time" + str(organism.time) + ".cfg" ) as file:
+                file.write(organism.net.toText())
         else:
             # line expected to be "[0,1,2,....]"
             print(organism.react(np.array(json.loads(line[:-1]))).flatten())
