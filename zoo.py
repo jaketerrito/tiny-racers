@@ -4,6 +4,7 @@ import time
 import json
 import operator
 import random
+import sys
 
 def mate(lover1,lover2):
 	return lover1['wgts']
@@ -46,3 +47,4 @@ for i,organism in enumerate(population):
 		json.dump(organism,file,indent=4)
 
 print(glob.glob("data/current_batch/*.cfg"))
+sys.stdout.flush()

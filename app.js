@@ -79,29 +79,34 @@ function gameLoop(){
    carList = gameObjects.updateWorld(cars,objects);
    io.sockets.emit('update',{'cars':carList});
 
-   if(comps.length < 1){
-      if(ai_configs){
-         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
-      }
-      var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg');
-      cars.push(AI.car);
-      comps.push(AI);
-      count++;
-   } else if(count == batch_size+1){
-      console.log(ai_configs)
+   if(comps.length == 0 && count == batch_size){
       comp = [];
       count =  0;
+      batch += 1;
       py = spawn('python3',['./zoo.py']);
       py.stderr.on('data',function(data){
          console.log(data.toString());
       });
       py.stdin.on('data',function(data){
-         ai_configs = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
-         console.log(ai_configs);
          gameLoop(); 
-      }.bind(ai_configs));
-      return;
+      };
    }
+
+   if(comps.length < 1){
+      if(count==0 && batch != 0){
+         ai_configs = USE GLOB TO GET LIST OF ALL FILE, need to download glob 
+      }
+      console.log(ai_configs);
+      if(ai_configs){
+         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
+      }else{
+         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg'); //'data/graveyard-1532920871.780046/11.82881768715704.cfg');
+      }
+      cars.push(AI.car);
+      comps.push(AI);
+      count++;
+   }
+      
 
    for(var i = comps.length-1; i >= 0; i--){
       if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 20000){
