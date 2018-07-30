@@ -110,10 +110,6 @@ class Organism:
         self.parents = None
         self.weights = self.net.weights
 
-    def mutate(self, coverage, degree):
-        # change a certain coverage of weights based off degree
-        self.weights = self.net.set_weights()
-
     def react(self,inputs):
         return self.net.predict((500-inputs)/500.0)
 
@@ -122,7 +118,7 @@ def main(cfg_file):
     with open(cfg_file) as file:
         cfg = json.load(file)
     if('wgts' in cfg):
-        organism = Organism(cfg['arch'],weights=cfg['wgts'])
+        organism = Organism(cfg['arch'],weights=cfg['wgts'],score=cfg['score'])
     else:
         organism = Organism(cfg['arch'])
 
@@ -131,10 +127,15 @@ def main(cfg_file):
         if "score" in line:
             organism.distance = float(line.split()[1].split(',')[0])
             organism.time = float(line.split()[1].split(',')[1])
-            with open("data/" + str(organism.time) + "-" + str(organism.distance) + ".cfg",'w') as file:
+            avg_speed = organism.distance / organism.time
+            organism.score = avg_speed * math.log(organism.time)
+            with open("data/" + str(organism.score) + ".cfg",'w') as file:
                 data = {}
                 data['arch'] = cfg['arch']
                 data['wgts'] = organism.net.get_weights()
+                data['time'] = organism.time
+                data['distance'] = organism.distance
+                data['score'] = organism.score
                 json.dump(data,file,indent=4)
         else:
             # line expected to be "[0,1,2,....]"
@@ -142,4 +143,4 @@ def main(cfg_file):
             sys.stdout.flush()
 
 if __name__ == '__main__':
-    main("NN/test.cfg")
+    main(sys.argv[-1])

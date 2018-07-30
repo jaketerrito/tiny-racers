@@ -48,7 +48,7 @@ io.on('connection',function(socket){
 function onClientDisconnect(data){
    //console.log("player disconnected: " + this.id);
    var toRemove = removeCar(this.id);
-   console.log(toRemove.travelled);
+   console.log(toRemove.travelled / (toRemove.age) * Math.log(toRemove.age));
    if(toRemove){
       cars.splice(cars.indexOf(toRemove),1);
    }else{
@@ -66,26 +66,36 @@ function removeCar(id){
    return null;
 }
 
+
+var batch = 0;
+var batch_size = 8;
+var count = 0;
+var ai_configs = null;
 function gameLoop(){
    var startTime = new Date().getTime();
    var tempList = [];
    var crashed = [];
    carList = gameObjects.updateWorld(cars,objects);
    io.sockets.emit('update',{'cars':carList});
-   var tickTime = new Date().getTime() - startTime;
-   if(tickTime < 0){
-      tickTime = 0;
-   }
-   if(tickTime > tickLength){
-      console.log("dropping frame");
-      setTimeout(gameLoop,(Math.floor(tickTime/tickLength)+1)*tickLength-tickTime);
-   }else{
-      setTimeout(gameLoop,tickLength-tickTime);
-   }
-   if(comps.length < 1){
-      var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000,null));
+
+   if(comps.length < 1 && count <= batch_size){
+      if(ai_configs){
+         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
+      }
+      var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg');
       cars.push(AI.car);
       comps.push(AI);
+      count++;
+   } else if(count == batch_size+1){
+      comp = [];
+      count =  0;
+      this.py = spawn('python3',['./zoo.py']);
+      this.py.stderr.on('data',function(data){
+         ai_configs = data;
+         console.log(ai.configs);
+         gameLoop(); 
+      });
+      return;
    }
 
    for(var i = comps.length-1; i >= 0; i--){
@@ -96,6 +106,17 @@ function gameLoop(){
          continue;
       }
       comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
+   }
+
+   var tickTime = new Date().getTime() - startTime;
+   if(tickTime < 0){
+      tickTime = 0;
+   }
+   if(tickTime > tickLength){
+      console.log("dropping frame");
+      setTimeout(gameLoop,(Math.floor(tickTime/tickLength)+1)*tickLength-tickTime);
+   }else{
+      setTimeout(gameLoop,tickLength-tickTime);
    }
 }
 gameLoop();
