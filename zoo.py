@@ -14,23 +14,22 @@ def mutate(organism):
 
 files = glob.glob("data/current_batch/*.cfg")
 for file in files:
-	os.remove(f);
+	os.remove(file)
 
-destination = 'data/batch-' + str(time.time())
+# Put previous generation in the grave
+destination = 'data/graveyard-' + str(time.time())
 os.makedirs(destination)
-
 files = glob.glob("data/*.cfg")
 for file in files:
-	os.popen('mv ' + file + " " + destination + "/" + os.path.basename(file))
+	os.rename(file, destination + "/" + os.path.basename(file))
 
+# Loads the previous generation
 files = glob.glob(destination + "/*.cfg")
-
 population = []
 for file in files:
 	with open(file) as data:
 		population.append(json.load(data))
 population_size = len(population)
-
 
 # Sort Population by score from highest to lowest
 population.sort(key=operator.itemgetter('score'),reverse=True)
@@ -40,8 +39,10 @@ population.sort(key=operator.itemgetter('score'),reverse=True)
 # Has 50% chance of Mutating from 0-10% of its genes -- may want to have it 0-100% but skewed heavily towards 0
 # -- Could store score's of ancestors, using that in determing value of genes
 for i,organism in enumerate(population):
-	organism['wgts'] = mate(organism['wgts'],population[random.randint(i,population_size)])
+	organism['wgts'] = mate(organism,population[random.randint(i,population_size-1)])
 	if random.choice([True,False]):
 		mutate(organism)
-	with open("data/current_batch/" + i + ".cfg",'w') as file:
-        json.dump(organism,file,indent=4)
+	with open("data/current_batch/" + str(i) + ".cfg",'w') as file:
+		json.dump(organism,file,indent=4)
+
+print(glob.glob("data/current_batch/*.cfg"))

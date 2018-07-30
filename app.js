@@ -3,6 +3,7 @@ var app = express();
 var serv = require('http').Server(app);
 var gameObjects = require('./tinyRacers.js');
 var aiObjects = require('./aiObjects.js');
+var spawn = require('child_process').spawn;
 
 app.get('/',function(req, res) {
 	res.sendFile(__dirname + '/client/tinyRacers.html');
@@ -78,7 +79,7 @@ function gameLoop(){
    carList = gameObjects.updateWorld(cars,objects);
    io.sockets.emit('update',{'cars':carList});
 
-   if(comps.length < 1 && count <= batch_size){
+   if(comps.length < 1){
       if(ai_configs){
          var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
       }
@@ -87,14 +88,18 @@ function gameLoop(){
       comps.push(AI);
       count++;
    } else if(count == batch_size+1){
+      console.log(ai_configs)
       comp = [];
       count =  0;
-      this.py = spawn('python3',['./zoo.py']);
-      this.py.stderr.on('data',function(data){
-         ai_configs = data;
-         console.log(ai.configs);
-         gameLoop(); 
+      py = spawn('python3',['./zoo.py']);
+      py.stderr.on('data',function(data){
+         console.log(data.toString());
       });
+      py.stdin.on('data',function(data){
+         ai_configs = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
+         console.log(ai_configs);
+         gameLoop(); 
+      }.bind(ai_configs));
       return;
    }
 
