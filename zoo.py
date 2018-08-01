@@ -5,12 +5,27 @@ import json
 import operator
 import random
 import sys
-
+import numpy as np
+	
+# Mates, crossing over values with another organism 
+# For humans the rate is 50% so each gene(matrix value) has same chance of being from lover1 or lover2
 def mate(lover1,lover2):
-	return lover1['wgts']
+	wgts1 = np.array(lover1['wgts'])
+	wgts2 = np.array(lover2['wgts'])
+	results = [];
+	for i,layer in enumerate(wgts1):
+		temp_layer = [];
+		for j,neuron in enumerate(layer):
+			temp_neuron = [];
+			for k,connection in enumerate(neuron):
+				temp_neuron.append(random.choice([wgts1[i][j][k],wgts2[i][j][k]]))
+			temp_layer.append(neuron)
+		results.append(layer)
+		print(results)
+	return results
 
 def mutate(organism):
-	return
+	return organism['wgts']
 
 
 files = glob.glob("data/current_batch/*.cfg")
@@ -34,7 +49,7 @@ population_size = len(population)
 
 # Sort Population by score from highest to lowest
 population.sort(key=operator.itemgetter('score'),reverse=True)
-# Mates, crossing over values with another organism (Rate in range 30-70%) -- For humans the rate is 50%, but I thought some extra variation could speed up training
+
 # Mate randomly with higher scoring organisms -- could be a bad idea! Hopefully it will make worse genes die out.
 # -- May want to add functionality beyond just swapping values
 # Has 50% chance of Mutating from 0-10% of its genes -- may want to have it 0-100% but skewed heavily towards 0
@@ -42,7 +57,7 @@ population.sort(key=operator.itemgetter('score'),reverse=True)
 for i,organism in enumerate(population):
 	organism['wgts'] = mate(organism,population[random.randint(i,population_size-1)])
 	if random.choice([True,False]):
-		mutate(organism)
+		organism['wgts'] = mutate(organism)
 	with open("data/current_batch/" + str(i) + ".cfg",'w') as file:
 		json.dump(organism,file,indent=4)
 

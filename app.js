@@ -4,6 +4,7 @@ var serv = require('http').Server(app);
 var gameObjects = require('./tinyRacers.js');
 var aiObjects = require('./aiObjects.js');
 var spawn = require('child_process').spawn;
+var glob = require("glob");
 
 app.get('/',function(req, res) {
 	res.sendFile(__dirname + '/client/tinyRacers.html');
@@ -56,7 +57,7 @@ function onClientDisconnect(data){
       //console.log('attempting to remove nonexistant player');
    }
 }
-var tickLength = Math.floor(1000/60);
+var tickLength = Math.floor(1000/256); //normal is 60 fps
 
 function removeCar(id){
    for(car of cars){
@@ -68,8 +69,8 @@ function removeCar(id){
 }
 
 
-var batch = 0;
-var batch_size = 8;
+var batch = 1028;
+var batch_size = 1028;
 var count = 0;
 var ai_configs = null;
 function gameLoop(){
@@ -83,20 +84,21 @@ function gameLoop(){
       comp = [];
       count =  0;
       batch += 1;
+      console.log("BATCH: " + batch);
       py = spawn('python3',['./zoo.py']);
       py.stderr.on('data',function(data){
-         console.log(data.toString());
+         console.log("PYTHON ERROR: " + data.toString());
       });
       py.stdin.on('data',function(data){
          gameLoop(); 
-      };
+      });
    }
 
    if(comps.length < 1){
       if(count==0 && batch != 0){
-         ai_configs = USE GLOB TO GET LIST OF ALL FILE, need to download glob 
+         ai_configs = glob.sync("./data/current_batch/*.cfg");
+         console.log(ai_configs);
       }
-      console.log(ai_configs);
       if(ai_configs){
          var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
       }else{
@@ -105,6 +107,7 @@ function gameLoop(){
       cars.push(AI.car);
       comps.push(AI);
       count++;
+      console.log("CAR: " + count);
    }
       
 

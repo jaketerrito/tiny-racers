@@ -3,6 +3,7 @@ import numpy.random as rnd
 import json
 import sys
 import math
+import time
 
 
 class Layer:
@@ -129,7 +130,7 @@ def main(cfg_file):
             organism.time = float(line.split()[1].split(',')[1])
             avg_speed = organism.distance / organism.time
             organism.score = avg_speed * math.log(organism.time)
-            with open("data/" + str(organism.score) + ".cfg",'w') as file:
+            with open("data/" + str(time.time()) + ".cfg",'w') as file:
                 data = {}
                 data['arch'] = cfg['arch']
                 data['wgts'] = organism.net.get_weights()
