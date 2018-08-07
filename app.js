@@ -69,11 +69,11 @@ function removeCar(id){
 }
 
 
-var batch = 1028;
-var batch_size = 1028;
+var batch_size = 10;
+var batch = 0;
 var count = 0;
 var ai_configs = null;
-function gameLoop(){
+global.gameLoop = function gameLoop(){
    var startTime = new Date().getTime();
    var tempList = [];
    var crashed = [];
@@ -81,7 +81,7 @@ function gameLoop(){
    io.sockets.emit('update',{'cars':carList});
 
    if(comps.length == 0 && count == batch_size){
-      comp = [];
+      comps = [];
       count =  0;
       batch += 1;
       console.log("BATCH: " + batch);
@@ -89,47 +89,45 @@ function gameLoop(){
       py.stderr.on('data',function(data){
          console.log("PYTHON ERROR: " + data.toString());
       });
-      py.stdin.on('data',function(data){
-         gameLoop(); 
-      });
-   }
-
-   if(comps.length < 1){
-      if(count==0 && batch != 0){
-         ai_configs = glob.sync("./data/current_batch/*.cfg");
-         console.log(ai_configs);
+      setTimeout(gameLoop,30000);
+   } else {
+      if(comps.length < 1){
+         if(count==0 && batch != 0){
+            ai_configs = glob.sync("./data/current_batch/*.cfg");
+            console.log(ai_configs);
+         }
+         if(ai_configs){
+            var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
+         }else{
+            var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg'); //'data/graveyard-1532920871.780046/11.82881768715704.cfg');
+         }
+         cars.push(AI.car);
+         comps.push(AI);
+         count++;
+         console.log("CAR: " + count);
       }
-      if(ai_configs){
-         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
+         
+
+      for(var i = comps.length-1; i >= 0; i--){
+         if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 10000){
+            comps[i].score();
+            cars.splice(cars.indexOf(comps[i].car),1);
+            comps.splice(i,1);
+            continue;
+         }
+         comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
+      }
+
+      var tickTime = new Date().getTime() - startTime;
+      if(tickTime < 0){
+         tickTime = 0;
+      }
+      if(tickTime > tickLength){
+         console.log("dropping frame");
+         setTimeout(gameLoop,(Math.floor(tickTime/tickLength)+1)*tickLength-tickTime);
       }else{
-         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg'); //'data/graveyard-1532920871.780046/11.82881768715704.cfg');
+         setTimeout(gameLoop,tickLength-tickTime);
       }
-      cars.push(AI.car);
-      comps.push(AI);
-      count++;
-      console.log("CAR: " + count);
-   }
-      
-
-   for(var i = comps.length-1; i >= 0; i--){
-      if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 20000){
-         comps[i].score();
-         cars.splice(cars.indexOf(comps[i].car),1);
-         comps.splice(i,1);
-         continue;
-      }
-      comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
-   }
-
-   var tickTime = new Date().getTime() - startTime;
-   if(tickTime < 0){
-      tickTime = 0;
-   }
-   if(tickTime > tickLength){
-      console.log("dropping frame");
-      setTimeout(gameLoop,(Math.floor(tickTime/tickLength)+1)*tickLength-tickTime);
-   }else{
-      setTimeout(gameLoop,tickLength-tickTime);
    }
 }
 gameLoop();

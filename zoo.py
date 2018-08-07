@@ -10,6 +10,7 @@ import numpy as np
 # Mates, crossing over values with another organism 
 # For humans the rate is 50% so each gene(matrix value) has same chance of being from lover1 or lover2
 def mate(lover1,lover2):
+	# wgts1 * randommatrix[0,1] + wgts2 * matrix[1] - randommatrix
 	wgts1 = np.array(lover1['wgts'])
 	wgts2 = np.array(lover2['wgts'])
 	results = [];
@@ -60,6 +61,5 @@ for i,organism in enumerate(population):
 		organism['wgts'] = mutate(organism)
 	with open("data/current_batch/" + str(i) + ".cfg",'w') as file:
 		json.dump(organism,file,indent=4)
-
 print(glob.glob("data/current_batch/*.cfg"))
 sys.stdout.flush()
