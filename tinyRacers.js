@@ -28,9 +28,9 @@ function updateWorld(cars,objects){
 
    for(var car of cars){
       var collided = car.checkCollision(cars);
-      if(time-car.lastMove > 30000 && car.socket){
+      /*if(time-car.lastMove > 30000 && car.socket){
          car.socket.disconnect(true);
-      }
+      }*/
       if(collided){
          for(other of collided){
             if(!getCar(car,crashed)){

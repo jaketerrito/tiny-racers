@@ -25,6 +25,7 @@ class AI {
 
    makeMove(data){
       var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
+      console.log(results);
       var thresh = .5
       if(results[0] > thresh){
          this.car.speedUp();

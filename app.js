@@ -69,7 +69,7 @@ function removeCar(id){
 }
 
 
-var batch_size = 10;
+var batch_size = 1000;
 var batch = 0;
 var count = 0;
 var ai_configs = null;
@@ -89,7 +89,10 @@ global.gameLoop = function gameLoop(){
       py.stderr.on('data',function(data){
          console.log("PYTHON ERROR: " + data.toString());
       });
-      setTimeout(gameLoop,30000);
+      py.stdin.on('data',function(data){
+         console.log("PYTHON MSG: " + data.toString());
+      });
+      setTimeout(gameLoop,10000);
    } else {
       if(comps.length < 1){
          if(count==0 && batch != 0){
@@ -99,7 +102,7 @@ global.gameLoop = function gameLoop(){
          if(ai_configs){
             var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
          }else{
-            var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg'); //'data/graveyard-1532920871.780046/11.82881768715704.cfg');
+            var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg');
          }
          cars.push(AI.car);
          comps.push(AI);

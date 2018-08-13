@@ -20,16 +20,10 @@ class Layer:
             self.in_weights = weights
         else:
             if(prev is not None):
-                self.in_weights = rnd.rand(dim,prev.dim+1) - .25
+                self.in_weights = rnd.rand(dim,prev.dim+1)
 
     def get_dim(self):
         return self.dim
-
-    def set_weights(self, weights=None):
-        if(weights is None):
-            weights = rnd.rand(self.dim,self.prev.dim+1)
-        self.in_weights = weights
-        return self.in_weights
 
     def get_weights(self):
         if self.in_weights is None:
@@ -73,12 +67,6 @@ class Network:
         for layer in self.layers:
             self.weights.append(layer.in_weights)
 
-    def set_weights(self, wgts=None):
-        self.weights = []
-        for layer in self.layers[1:]:
-            self.weights.append(layer.set_weights(wgts))
-        return self.weights
-
     # Forward propagate, passing inputs to first layer, and returning outputs
     # of final layer
     def predict(self, inputs):
@@ -98,6 +86,8 @@ class Network:
 def get_function(form):
     if(form == 'relu'):
         return lambda z: (z > 0) * z
+    elif(form == 'linear'):
+        return lambda z: z
     elif(form == 'softmax'):
         return lambda z: np.exp(z) / np.sum(np.exp(z), axis=0)
     elif(form == 'sigmoid'):
