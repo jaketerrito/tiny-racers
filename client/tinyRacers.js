@@ -2,7 +2,7 @@
 //CSC 378
 //Jacob Territo
 
-
+var objects = []; 
 var cars = [];
 window.addEventListener('load', eventWindowLoaded, false);
 //event listener executes eventWindowLoaded once the canvas window is loaded.
@@ -57,7 +57,8 @@ function canvasApp(){
    socket.connect();
    socket.on('initialize',init);
    function init(data){
-      toCar(data);
+      toObj(data.objects);
+      toCar(data.cars);
       drawScreen();
    }
    socket.on('crash',crash);
@@ -70,10 +71,11 @@ function canvasApp(){
       drawScreen();
    }
 
-   var background = new Image();
-   background.src = "/client/track.jpg";
    function drawScreen(){
-      context.drawImage(background,-50,-50,1100,850);
+      context.clearRect(-50,-50,1100,850);
+      for(thing of objects){
+         thing.draw();
+      }
       for(car of cars){
          car.draw();
       }
@@ -121,4 +123,39 @@ function playSound(sound,volume) {
 		tempSound.volume = volume;
 		tempSound.loop = false;
 		tempSound.play();
+}
+
+function toObj(list){
+   var temp = [];
+   for(var points of list){
+      var thing = new Collidable(1);
+      thing.points = points;
+      /*for(var point of points){
+         thing.points.push(new Point(point.x,point.y));
+      }*/
+      temp.push(thing);
+   }
+   objects = temp.slice();
+}
+ class Collidable {
+      constructor(id){
+            this.id = id;
+            this.points = [];
+      }
+       draw(){
+            var outline = 'grey';
+            var color = 'rgba(0,0,0,.2)';
+            context.beginPath();
+            context.strokeStyle = outline; 
+            context.fillStyle = color;
+            context.lineWidth=2;
+            context.moveTo(this.points[0].x,this.points[0].y);
+            for(var i = 1; i < this.points.length; i ++){ 
+                  context.lineTo(this.points[i].x,this.points[i].y);
+            } 
+            context.lineTo(this.points[0].x,this.points[0].y);
+            context.stroke(); 
+            context.fill();
+            context.closePath();
+      }
 }

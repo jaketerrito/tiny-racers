@@ -18,10 +18,10 @@ var io = require('socket.io')(serv,{});
 
 var objects = []
 gameObjects.makeMap(objects)
-//var objectList = [];
-//for(thing of objects){
-//   objectList.push(thing.points);
-//}
+var objectList = [];
+for(thing of objects){
+   objectList.push(thing.points);
+}
 var cars = []
 var carList = [];
 var comps = [];
@@ -31,8 +31,8 @@ io.on('connection',function(socket){
    var car = new gameObjects.makeCar(cars,socket.id,socket);
    cars.push(car);
    carList.push(car.json());
-   //socket.emit('initialize',{'objects':objectList,'cars':carList});
-   socket.emit('initialize',carList);
+   socket.emit('initialize',{'objects':objectList,'cars':carList});
+   //socket.emit('initialize',carList);
    socket.on('keyDown', function (data) {
       car.keyMap[data] = 1;
    });
@@ -57,7 +57,7 @@ function onClientDisconnect(data){
       //console.log('attempting to remove nonexistant player');
    }
 }
-var tickLength = Math.floor(1000/256); //normal is 60 fps
+var tickLength = Math.floor(1000/256); //fps
 
 function removeCar(id){
    for(car of cars){

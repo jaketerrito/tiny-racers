@@ -19,13 +19,18 @@ class AI {
    }
    
    score(){
-      this.py.stdin.end("score " + this.car.travelled + "," + this.car.age);
-      console.log("score = " + this.car.travelled / this.car.age * Math.log(this.car.age));
+      var score = this.car.fromOrigin() * Math.log(this.car.travelled/this.car.age+1);
+      if(this.car.crashed){
+         score = score * .75;
+      }
+      if(isNaN(score)){
+         score = -1000;
+      }
+      this.py.stdin.end("score " + score +"," + this.car.fromOrigin() + "," + this.car.age);
    }
 
    makeMove(data){
       var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
-      console.log(results);
       var thresh = .5
       if(results[0] > thresh){
          this.car.speedUp();

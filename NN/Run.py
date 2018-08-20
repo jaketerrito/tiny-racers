@@ -20,7 +20,7 @@ class Layer:
             self.in_weights = weights
         else:
             if(prev is not None):
-                self.in_weights = rnd.rand(dim,prev.dim+1)
+                self.in_weights = rnd.rand(dim,prev.dim+1) -.25
 
     def get_dim(self):
         return self.dim
@@ -116,10 +116,9 @@ def main(cfg_file):
     for line in sys.stdin:
         # expects "score {score}" as final line
         if "score" in line:
-            organism.distance = float(line.split()[1].split(',')[0])
-            organism.time = float(line.split()[1].split(',')[1])
-            avg_speed = organism.distance / organism.time
-            organism.score = avg_speed * math.log(organism.time)
+            organism.score = float(line.split()[1].split(',')[0])
+            organism.distance = float(line.split()[1].split(',')[1])
+            organism.time = float(line.split()[1].split(',')[2])
             with open("data/" + str(organism.score) + "-" + str(time.time()) + ".cfg",'w') as file:
                 data = {}
                 data['arch'] = cfg['arch']
