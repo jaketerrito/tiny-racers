@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var serv = require('http').Server(app);
-var gameObjects = require('./tinyRacers.js');
+var gameObjects = require('./gameObjects.js');
 var aiObjects = require('./aiObjects.js');
 var spawn = require('child_process').spawn;
 var glob = require("glob");
@@ -57,7 +57,7 @@ function onClientDisconnect(data){
       //console.log('attempting to remove nonexistant player');
    }
 }
-var tickLength = Math.floor(1000/256); //fps
+var tickLength = Math.floor(1000/30);//fps
 
 function removeCar(id){
    for(car of cars){
@@ -94,25 +94,27 @@ global.gameLoop = function gameLoop(){
       });
       setTimeout(gameLoop,10000);
    } else {
-      if(comps.length < 1){
-         if(count==0 && batch != 0){
-            ai_configs = glob.sync("./data/current_batch/*.cfg");
-            console.log(ai_configs);
+      if(comps.length == 0){
+         for(var i = 0; i < 50; i ++){
+            if(count==0 && batch != 0){
+               ai_configs = glob.sync("./data/current_batch/*.cfg");
+               console.log(ai_configs);
+            }
+            if(ai_configs){
+               var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
+            }else{
+               var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg');
+            }
+            cars.push(AI.car);
+            comps.push(AI);
+            count++;
+            console.log("CAR: " + count);
          }
-         if(ai_configs){
-            var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
-         }else{
-            var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg');
-         }
-         cars.push(AI.car);
-         comps.push(AI);
-         count++;
-         console.log("CAR: " + count);
       }
          
 
       for(var i = comps.length-1; i >= 0; i--){
-         if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 10000){
+         if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 45000){
             comps[i].score();
             cars.splice(cars.indexOf(comps[i].car),1);
             comps.splice(i,1);

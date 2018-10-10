@@ -20,7 +20,7 @@ class Layer:
             self.in_weights = weights
         else:
             if(prev is not None):
-                self.in_weights = rnd.rand(dim,prev.dim+1) -.25
+                self.in_weights = rnd.rand(dim,prev.dim+1) * 20 - 10
 
     def get_dim(self):
         return self.dim
@@ -119,7 +119,7 @@ def main(cfg_file):
             organism.score = float(line.split()[1].split(',')[0])
             organism.distance = float(line.split()[1].split(',')[1])
             organism.time = float(line.split()[1].split(',')[2])
-            with open("data/" + str(organism.score) + "-" + str(time.time()) + ".cfg",'w') as file:
+            with open("data/" + str(organism.score) + "-" + str(time.time()) + '-' + str(rnd.random()) + ".cfg",'w') as file:
                 data = {}
                 data['arch'] = cfg['arch']
                 data['wgts'] = organism.net.get_weights()

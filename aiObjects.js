@@ -1,4 +1,4 @@
-var gameObjects = require('./tinyRacers.js');
+var gameObjects = require('./gameObjects.js');
 var spawn = require('child_process').spawn;
 
 class AI {
@@ -19,14 +19,14 @@ class AI {
    }
    
    score(){
-      var score = this.car.fromOrigin() * Math.log(this.car.travelled/this.car.age+1);
+      var score = this.car.travelled * Math.log(this.car.travelled/this.car.age+1);
       if(this.car.crashed){
          score = score * .75;
       }
       if(isNaN(score)){
          score = -1000;
       }
-      this.py.stdin.end("score " + score +"," + this.car.fromOrigin() + "," + this.car.age);
+      this.py.stdin.end("score " + score +"," + this.car.travelled + "," + this.car.age);
    }
 
    makeMove(data){
@@ -86,11 +86,12 @@ class AI {
                   done = true;
                }
             }
-            for(var collidable of cars){
+            //Don't check since we are training multiple at the same time
+            /*for(var collidable of cars){
                if(this.car.id != collidable.id && gameObjects.pointIn(collidable.points,point)){
                   done = true;
                }
-            }
+            }*/
             this.distances[i] = d;
             if(d > 500){
                done = true;

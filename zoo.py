@@ -16,8 +16,8 @@ def mate(lover1,lover2):
 	for i in range(len(wgts1)):
 		wgts1current= np.array(wgts1[i])
 		wgts2current= np.array(wgts2[i])
-		crossover = np.random.random_integers(0,1,wgts1current.shape) ## need to change randomness or maybe swap whole neurons?
-		results.append((wgts1current * crossover + wgts2current * (np.ones(wgts1current.shape).astype(int) - crossover)).tolist())
+		crossover = np.random.random_integers(0,1,wgts1current.shape)
+		results.append(wgts1current * crossover + wgts2current * (np.ones(wgts1current.shape).astype(int) - crossover))
 	return results
 
 def mutate(organism,rate):
@@ -25,7 +25,7 @@ def mutate(organism,rate):
 	results = []
 	for i in range(len(wgts)):
 		wgt = np.array(wgts[i]) # need to make my own function to produce better random distribution
-		results.append((wgt + ((np.random.random(wgt.shape) - .5) * rate)).tolist())
+		results.append(wgt + ((np.random.normal(scale=.1,size=wgt.shape) - .5) * rate))
 	return results
 
 
