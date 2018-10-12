@@ -25,7 +25,7 @@ def mutate(organism,rate):
 	results = []
 	for i in range(len(wgts)):
 		wgt = np.array(wgts[i]) # need to make my own function to produce better random distribution
-		results.append((wgt + ((np.random.normal(scale=.1,size=wgt.shape) - .5) * rate)).tolist())
+		results.append((wgt + ((np.random.normal(scale=.1,size=wgt.shape) - .5) * (1+rate))).tolist())
 	return results
 
 
