@@ -49,7 +49,7 @@ for file in files:
 population_size = len(population)
 
 # Sort Population by score from highest to lowest
-population.sort(key=operator.itemgetter('score'),reverse=False)
+population.sort(key=operator.itemgetter('score'),reverse=True)
 # Mate randomly with higher scoring organisms -- could be a bad idea! Hopefully it will make worse genes die out.
 # -- May want to add functionality beyond just swapping values
 # Has 50% chance of Mutating from 0-10% of its genes -- may want to have it 0-100% but skewed heavily towards 0
