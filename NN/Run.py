@@ -20,7 +20,7 @@ class Layer:
             self.in_weights = weights
         else:
             if(prev is not None):
-                self.in_weights = rnd.rand(dim,prev.dim+1) * 20 - 10
+                self.in_weights = (rnd.rand(dim,prev.dim+1) -.5)* 10
 
     def get_dim(self):
         return self.dim

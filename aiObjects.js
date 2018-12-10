@@ -19,7 +19,7 @@ class AI {
    }
    
    score(){
-      var score = this.car.travelled * Math.log(this.car.travelled/this.car.age+1);
+      var score = this.car.travelled * Math.log(this.car.age);
       if(this.car.crashed){
          score = score * .75;
       }

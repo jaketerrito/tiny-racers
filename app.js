@@ -50,7 +50,6 @@ io.on('connection',function(socket){
 function onClientDisconnect(data){
    //console.log("player disconnected: " + this.id);
    var toRemove = removeCar(this.id);
-   console.log(toRemove.travelled / (toRemove.age) * Math.log(toRemove.age));
    if(toRemove){
       cars.splice(cars.indexOf(toRemove),1);
    }else{
@@ -95,7 +94,7 @@ global.gameLoop = function gameLoop(){
       setTimeout(gameLoop,10000);
    } else {
       if(comps.length == 0){
-         for(var i = 0; i < 50; i ++){
+         for(var i = 0; i < batch_size/20; i ++){
             if(count==0 && batch != 0){
                ai_configs = glob.sync("./data/current_batch/*.cfg");
                console.log(ai_configs);
