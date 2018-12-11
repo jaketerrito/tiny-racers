@@ -37,11 +37,6 @@ io.on('connection',function(socket){
       car.keyMap[data] = 1;
    });
    socket.on('keyUp', function (data) {
-      if(data == 80){
-         var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000,null));
-         cars.push(AI.car);
-         comps.push(AI);
-      }
       car.lastMove = new Date().getTime();
       car.keyMap[data] = 0;
    });
@@ -56,7 +51,7 @@ function onClientDisconnect(data){
       //console.log('attempting to remove nonexistant player');
    }
 }
-var tickLength = Math.floor(1000/30);//fps
+var tickLength = Math.floor(1000/240);//fps
 
 function removeCar(id){
    for(car of cars){
@@ -68,70 +63,30 @@ function removeCar(id){
 }
 
 
-var batch_size = 1000;
-var batch = 0;
 var count = 0;
 var ai_configs = null;
-global.gameLoop = function gameLoop(){
+
+gameLoop = () => {
    var startTime = new Date().getTime();
    var tempList = [];
    var crashed = [];
    carList = gameObjects.updateWorld(cars,objects);
-   io.sockets.emit('update',{'cars':carList});
-
-   if(comps.length == 0 && count == batch_size){
-      comps = [];
-      count =  0;
-      batch += 1;
-      console.log("BATCH: " + batch);
-      py = spawn('python3',['./zoo.py']);
-      py.stderr.on('data',function(data){
-         console.log("PYTHON ERROR: " + data.toString());
-      });
-      py.stdin.on('data',function(data){
-         console.log("PYTHON MSG: " + data.toString());
-      });
-      setTimeout(gameLoop,10000);
-   } else {
-      if(comps.length == 0){
-         for(var i = 0; i < batch_size/20; i ++){
-            if(count==0 && batch != 0){
-               ai_configs = glob.sync("./data/current_batch/*.cfg");
-               console.log(ai_configs);
-            }
-            if(ai_configs){
-               var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),ai_configs[count]);
-            }else{
-               var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'NN/test.cfg');
-            }
-            cars.push(AI.car);
-            comps.push(AI);
-            count++;
-            console.log("CAR: " + count);
-         }
+   io.sockets.emit('update',{'cars':carList});         
+   for(var i = comps.length-1; i >= 0; i--){
+      if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 45000){
+         comps[i].score();
+         cars.splice(cars.indexOf(comps[i].car),1);
+         comps[i].setCar(new gameObjects.makeCar(cars,Math.random() * 1000));
+         cars.push(comps[i].car);  
       }
-         
-
-      for(var i = comps.length-1; i >= 0; i--){
-         if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 45000){
-            comps[i].score();
-            cars.splice(cars.indexOf(comps[i].car),1);
-            comps.splice(i,1);
-            continue;
-         }
-         comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
-      }
-
-      var tickTime = new Date().getTime() - startTime;
-      if(tickTime < 0){
-         tickTime = 0;
-      }
-      if(tickTime > tickLength){
-         console.log("dropping frame");
-         setTimeout(gameLoop,(Math.floor(tickTime/tickLength)+1)*tickLength-tickTime);
-      }else{
-         setTimeout(gameLoop,tickLength-tickTime);
-      }
+      comps[i].score();
+      comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
    }
 }
+var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'None', gameLoop);
+cars.push(AI.car);
+comps.push(AI);
 gameLoop();
+
+
+//GAMELOOP CALLBACK OFROM updateDistances

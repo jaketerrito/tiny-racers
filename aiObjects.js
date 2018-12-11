@@ -2,65 +2,76 @@ var gameObjects = require('./gameObjects.js');
 var spawn = require('child_process').spawn;
 
 class AI {
-   constructor(car,cfg='NN/test.cfg'){
+   constructor(car,cfg='None', callback){
       this.car = car;
       this.views = 12;
       this.distances = [];
       for(var i = 0; i < this.views; i++){
          this.distances.push(500);
       }
-      this.py = spawn('python3',['./NN/Run.py',cfg]);
+      this.callback = callback
+      this.py = spawn('python',['./NN/Run.py',cfg]);
       this.py.stdout.on('data', function(data){
          this.makeMove(data);
       }.bind(this));
       this.py.stderr.on('data',function(data){
-         console.log("ERROR:" + data.toString());
+         console.log(data.toString());
       });
+   }
+
+   setCar(car){
+      this.car = car;
+      this.distances = [];
+      for(var i = 0; i < this.views; i++){
+         this.distances.push(500);
+      }
+      this.py.stdout.on('data', function(data){
+         this.makeMove(data);
+      }.bind(this));
    }
    
    score(){
-      var score = this.car.travelled * Math.log(this.car.age);
+      var score = this.car.travelled * Math.log(this.car.travelled/this.car.age);
       if(this.car.crashed){
-         score = score * .75;
+         score = score = -10;
       }
       if(isNaN(score)){
-         score = -1000;
+         score = -10;
       }
-      this.py.stdin.end("score " + score +"," + this.car.travelled + "," + this.car.age);
+      this.py.stdin.write("score " + score +"," + this.car.travelled + "," + this.car.age + '\n');
    }
 
    makeMove(data){
-      var results = data.toString().split(/,|\[|\]| |\n/).filter(Boolean).map(Number);
-      var thresh = .5
-      if(results[0] > thresh){
+      var move = Number(data.toString());
+      if(move == 0){
          this.car.speedUp();
       }
-      if(results[1] > thresh){
+      if(move == 1){
          this.car.slowDown(); 
       }
-      if(results[2] > thresh){
+      if(move == 2){
          this.car.turnLeft(.1);
       }
-      if(results[3] > thresh){
+      if(move == 3){
          this.car.turnRight(.1);
       }
-      return;
-      for(var distance of this.distances){
-         if(distance < 50 && this.car.vel**2 > 4){
-            this.car.stop();
-         }
-      }
-      if(this.distances[0] > 50){
-         this.car.speedUp();
-      } else {
+      if(move == 4){
          this.car.slowDown();
+         this.car.turnRight(.1); 
       }
-      var turn = Math.random() * 2 - 1;
-      if(turn > 0){
-         this.car.turnLeft(turn);
-      } else{
-         this.car.turnRight(turn);
+      if(move == 5){
+         this.car.turnLeft(.1);
+         this.car.speedUp();
       }
+      if(move == 6){
+         this.car.turnRight(.1);
+         this.car.speedUp();
+      }
+      if(move == 7){
+         this.car.slowDown();
+         this.car.turnLeft(.1);
+      }
+      this.callback();
    }
 
    updateDistances(objects,cars){
