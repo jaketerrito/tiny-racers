@@ -13,7 +13,7 @@ from collections import deque
 class Agent:
     def __init__(self, file=None, batch_size=None):
         self.memory = deque(maxlen=batch_size * 2) # maxlen is number of frames to remember
-        self.gamma = 0.3
+        self.gamma = 0.95
         self.epsilon = 1.0
         self.epsilon_min = 0.001
         self.epsilon_decay = 0.995
@@ -43,7 +43,7 @@ class Agent:
     def replay(self):
         sys.stderr.write("Python: Training\n")
         sys.stderr.flush()
-        minibatch = random.sample(self.memory, self.batch_size/8.0)
+        minibatch = random.sample(self.memory, math.floor(self.batch_size/8))
 
         for state, action, reward, next_state, done in minibatch:
             target_action = reward
@@ -63,8 +63,8 @@ class Agent:
         sys.stderr.flush()
 
     def act(self, state):
-        if np.random.rand() <= self.epsilon and False:
-            action = np.random.rand(action_size)
+        if np.random.rand() <= self.epsilon:
+            action = np.random.rand(self.action_size)
         else:
             action = self.model.predict(state)[0]
         action = np.argmax(action)
@@ -100,7 +100,7 @@ def main(weights):
             reward = float(line.split()[1].split(',')[0])
             sum_reward += reward
         else:
-            # line enp.array(json.loads(line[:-1]))xpected to be "[0,1,2,....]"
+            # line np.array(json.loads(line[:-1]))xpected to be "[0,1,2,....]"
             next_state = np.reshape(np.array(json.loads(line[:-1])).flatten(), (1,13))
             agent.remember(state, action, reward, next_state, False)
             state = next_state

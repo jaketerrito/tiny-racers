@@ -24,7 +24,6 @@ for(thing of objects){
 }
 var cars = []
 var carList = [];
-var comps = [];
 io.on('connection',function(socket){
    //console.log("A user connected: " + socket.id);
    socket.on('disconnect',onClientDisconnect);
@@ -51,7 +50,6 @@ function onClientDisconnect(data){
       //console.log('attempting to remove nonexistant player');
    }
 }
-var tickLength = Math.floor(1000/240);//fps
 
 function removeCar(id){
    for(car of cars){
@@ -66,27 +64,22 @@ function removeCar(id){
 var count = 0;
 var ai_configs = null;
 
-gameLoop = () => {
-   var startTime = new Date().getTime();
+gameLoop = async () => {
    var tempList = [];
    var crashed = [];
    carList = gameObjects.updateWorld(cars,objects);
-   io.sockets.emit('update',{'cars':carList});         
-   for(var i = comps.length-1; i >= 0; i--){
-      if(comps[i].car.crashed || startTime - comps[i].car.lastMove > 45000){
-         comps[i].score();
-         cars.splice(cars.indexOf(comps[i].car),1);
-         comps[i].setCar(new gameObjects.makeCar(cars,Math.random() * 1000));
-         cars.push(comps[i].car);  
-      }
-      comps[i].score();
-      comps[i].updateDistances(objects, cars); //automatically make's move based off nn response
+   io.sockets.emit('update',{'cars':carList});       
+   await AI.score();  
+   if(AI.car.crashed){
+      cars.splice(cars.indexOf(AI.car),1);
+      AI.setCar(new gameObjects.makeCar(cars,Math.random() * 1000));
+      cars.push(AI.car);  
    }
+   AI.updateDistances(objects, cars); //automatically make's move based off nn response
 }
 var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'None', gameLoop);
 cars.push(AI.car);
-comps.push(AI);
+//GAMELOOP CALLBACK OFROM updateDistances
 gameLoop();
 
 
-//GAMELOOP CALLBACK OFROM updateDistances

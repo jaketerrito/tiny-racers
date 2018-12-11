@@ -10,10 +10,11 @@ class AI {
          this.distances.push(500);
       }
       this.callback = callback
-      this.py = spawn('python',['./NN/Run.py',cfg]);
-      this.py.stdout.on('data', function(data){
+      this.data_handler = (data) => {
          this.makeMove(data);
-      }.bind(this));
+      }
+      this.py = spawn('python',['./NN/Run.py',cfg]);
+      this.py.stdout.on('data', this.data_handler);
       this.py.stderr.on('data',function(data){
          console.log(data.toString());
       });
@@ -25,24 +26,26 @@ class AI {
       for(var i = 0; i < this.views; i++){
          this.distances.push(500);
       }
-      this.py.stdout.on('data', function(data){
+      this.py.stdout.removeListener('data', this.data_handler);
+      this.data_handler = (data) => {
          this.makeMove(data);
-      }.bind(this));
+      }
+      this.py.stdout.on('data', this.data_handler);
    }
    
    score(){
       var score = this.car.travelled * Math.log(this.car.travelled/this.car.age);
       if(this.car.crashed){
-         score = score = -10;
+         score = score = -1000;
       }
       if(isNaN(score)){
-         score = -10;
+         score = -1000;
       }
       this.py.stdin.write("score " + score +"," + this.car.travelled + "," + this.car.age + '\n');
    }
 
    makeMove(data){
-      var move = Number(data.toString());
+      var move = data.toString();
       if(move == 0){
          this.car.speedUp();
       }
@@ -71,6 +74,7 @@ class AI {
          this.car.slowDown();
          this.car.turnLeft(.1);
       }
+
       this.callback();
    }
 
