@@ -172,7 +172,7 @@ class Polygon extends Collidable {
 }
 
 function makeCar(cars,id,socket){
-   var spots = [[500,650]];//[[100,100]]; //[[100,400]];
+   var spots = [[100,100]]; //300,650]];//[[100,400]];
    var car = new Car(0,0,id,socket);
    for(spot of spots){
       car.x = spot[0];
@@ -204,7 +204,7 @@ class Car extends Collidable{
             this.points = [];
             this.setPoints();
             this.vel = 0;
-            this.angle = Math.PI; //client needs
+            this.angle = 0;//Math.PI; //client needs
             this.stopped = false;
             this.MAXVEL = 15*this.speed;
             this.MAXTURN = Math.PI / 36 * this.rotspeed;

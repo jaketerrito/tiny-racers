@@ -4,6 +4,7 @@ var spawn = require('child_process').spawn;
 class AI {
    constructor(car,cfg='None', callback){
       this.car = car;
+      this.last_travelled = 0;
       this.views = 12;
       this.distances = [];
       for(var i = 0; i < this.views; i++){
@@ -34,12 +35,13 @@ class AI {
    }
    
    score(){
-      var score = this.car.travelled * Math.log(this.car.travelled/this.car.age);
+      var score = this.car.travelled - this.car.last_travelled;
+      this.car.last_travelled = this.car.travelled;
       if(this.car.crashed){
-         score = score = -1000;
+         score = -1000;
       }
       if(isNaN(score)){
-         score = -1000;
+         score = -1;
       }
       this.py.stdin.write("score " + score +"," + this.car.travelled + "," + this.car.age + '\n');
    }
@@ -107,7 +109,7 @@ class AI {
                   done = true;
                }
             }*/
-            this.distances[i] = d;
+            this.distances[i] = d/250;
             if(d > 500){
                done = true;
             }

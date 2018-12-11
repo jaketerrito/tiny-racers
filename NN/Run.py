@@ -12,8 +12,8 @@ from collections import deque
 
 class Agent:
     def __init__(self, file=None, batch_size=None):
-        self.memory = deque(maxlen=batch_size * 2) # maxlen is number of frames to remember
-        self.gamma = 0.95
+        self.memory = deque(maxlen=batch_size) # maxlen is number of frames to remember
+        self.gamma = 0.3
         self.epsilon = 1.0
         self.epsilon_min = 0.001
         self.epsilon_decay = 0.995
@@ -25,8 +25,9 @@ class Agent:
 
     def build_model(self, file):
         model = Sequential()
-        model.add(Dense(16, activation='relu', input_dim=13))
-        model.add(Dense(self.action_size, activation='linear'))
+        model.add(Dense(12, activation='relu', input_dim=13))
+        model.add(Dense(8, activation='relu'))
+        model.add(Dense(self.action_size, activation='softmax'))
 
         if file != None:
            model.load_weights(file)
@@ -43,7 +44,10 @@ class Agent:
     def replay(self):
         sys.stderr.write("Python: Training\n")
         sys.stderr.flush()
-        minibatch = random.sample(self.memory, math.floor(self.batch_size/8))
+        if len(self.memory) >= self.batch_size:
+            minibatch = random.sample(self.memory, math.floor(self.batch_size/2))
+        else:
+            minibatch = random.sample(self.memory, math.floor(len(self.memory)))
 
         for state, action, reward, next_state, done in minibatch:
             target_action = reward
@@ -59,8 +63,6 @@ class Agent:
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
-        sys.stderr.write("Python: DONE Training\n")
-        sys.stderr.flush()
 
     def act(self, state):
         if np.random.rand() <= self.epsilon:
@@ -76,7 +78,8 @@ class Agent:
 def main(weights):
     sys.stderr.write("Python: Starting Model\n")
     sys.stderr.flush()
-    batch_size = 4800
+    batch_size = 3600
+    batch_count = 0
     count = 0
     sum_reward = 0
     state = None
@@ -99,6 +102,15 @@ def main(weights):
         if "score" in line:
             reward = float(line.split()[1].split(',')[0])
             sum_reward += reward
+            if reward == -1000: # We don't want rewards to carry over from previous crash. so we replay and forget about past attempt
+                agent.replay()
+                agent.memory.clear()
+                agent.model.save_weights("./weights/agentweights-{}.hdf5".format(sum_reward/count))
+                sys.stderr.write("Python: Average reward = " + str(sum_reward/count) + "\n")
+                sys.stderr.flush()
+                count = 0
+                sum_reward = 0
+                batch_count += 1
         else:
             # line np.array(json.loads(line[:-1]))xpected to be "[0,1,2,....]"
             next_state = np.reshape(np.array(json.loads(line[:-1])).flatten(), (1,13))
@@ -106,11 +118,18 @@ def main(weights):
             state = next_state
             action = agent.act(state).flatten()
             count += 1
+
         if count > batch_size:
             agent.replay()
             agent.model.save_weights("./weights/agentweights-{}.hdf5".format(sum_reward/count))
+            sys.stderr.write("Python: Average reward = " + str(sum_reward/count) + "\n")
+            sys.stderr.flush()
             count = 0
             sum_reward = 0
+            batch_count += 1
+        if batch_count > 4:
+            batch_count = 0
+            agent.update_target_model()
 
 if __name__ == '__main__':
     main(sys.argv[-1])
