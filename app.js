@@ -60,10 +60,7 @@ function removeCar(id){
    return null;
 }
 
-
-var count = 0;
-var ai_configs = null;
-
+var start = new Date().getTime();
 gameLoop = async () => {
    var tempList = [];
    var crashed = [];
@@ -74,8 +71,12 @@ gameLoop = async () => {
       cars.splice(cars.indexOf(AI.car),1);
       AI.setCar(new gameObjects.makeCar(cars,Math.random() * 1000));
       cars.push(AI.car);  
+      start = new Date().getTime();
    }
    AI.updateDistances(objects, cars); //automatically make's move based off nn response
+   if(new Date().getTime() - start > 60000){ //automatically resets a
+      AI.car.crash();
+   }
 }
 var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'None', gameLoop);
 cars.push(AI.car);

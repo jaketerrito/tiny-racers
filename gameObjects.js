@@ -28,9 +28,6 @@ function updateWorld(cars,objects){
 
    for(var car of cars){
       var collided = car.checkCollision(cars);
-      /*if(time-car.lastMove > 30000 && car.socket){
-         car.socket.disconnect(true);
-      }*/
       if(collided){
          for(other of collided){
             if(!getCar(car,crashed)){
@@ -92,19 +89,6 @@ function makeMap(objects){
       shape = new Collidable(1);
       shape.points = [new Point(19,219),new Point(47,237),new Point(57,275),new Point(73,309),new Point(122,347),new Point(170,360),new Point(531,359),new Point(558,370),new Point(573,391),new Point(572,404),new Point(558,424),new Point(538,433),new Point(183,431),new Point(142,436),new Point(106,455),new Point(77,482),new Point(56,515),new Point(48,552),new Point(54,592),new Point(74,628),new Point(101,657),new Point(139,673),new Point(178,676),new Point(800,679),new Point(839,673),new Point(875,654),new Point(905,627),new Point(925,594),new Point(930,563),new Point(929,221),new Point(914,181),new Point(887,151),new Point(842,122),new Point(794,114),new Point(651,114),new Point(623,106),new Point(601,85),new Point(548,50),new Point(491,32),new Point(438,44),new Point(411,64),new Point(380,84),new Point(349,110),new Point(352,4),new Point(999,4),new Point(965,698),new Point(46,714),new Point(8,613)];
       objects.push(shape);
-
-
-      /* Initial training map 
-      shape = new Collidable(1);
-      shape.points = [new Point(150,375), new Point(250,375), new Point(250,425), new Point(150,425)];
-      objects.push(shape);
-      shape = new Collidable(1);
-      shape.points = [new Point(100,500), new Point(750,500), new Point(750,550), new Point(100,550)];
-      objects.push(shape);
-      shape = new Collidable(1);
-      shape.points = [new Point(100,250), new Point(750,250), new Point(750,300), new Point(100,300)];
-      objects.push(shape);*/
-      
 }
 
 function hex_corner(center, size, sides, i){
@@ -172,7 +156,7 @@ class Polygon extends Collidable {
 }
 
 function makeCar(cars,id,socket){
-   var spots = [[100,100]]; //300,650]];//[[100,400]];
+   var spots = [[300,150]];//[[100,100]]; //300,650]];//[[100,400]];
    var car = new Car(0,0,id,socket);
    for(spot of spots){
       car.x = spot[0];
@@ -188,7 +172,6 @@ function makeCar(cars,id,socket){
 class Car extends Collidable{
       constructor(x,y,id,socket){
             super(id);
-            this.lastMove = new Date().getTime(); 
             this.speed = .3;
             this.rotspeed = .4;
             this.keyMap = {};

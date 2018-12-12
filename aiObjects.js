@@ -5,7 +5,7 @@ class AI {
    constructor(car,cfg='None', callback){
       this.car = car;
       this.last_travelled = 0;
-      this.views = 12;
+      this.views = 24;
       this.distances = [];
       for(var i = 0; i < this.views; i++){
          this.distances.push(500);
@@ -34,14 +34,17 @@ class AI {
       this.py.stdout.on('data', this.data_handler);
    }
    
-   score(){
+   score(score=null){
       var score = this.car.travelled - this.car.last_travelled;
+      if(score < 0){
+         score = score * 2;
+      }
       this.car.last_travelled = this.car.travelled;
       if(this.car.crashed){
-         score = -1000;
+         score = -1;
       }
       if(isNaN(score)){
-         score = -1;
+         score = 0;
       }
       this.py.stdin.write("score " + score +"," + this.car.travelled + "," + this.car.age + '\n');
    }
