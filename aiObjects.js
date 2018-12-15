@@ -14,7 +14,7 @@ class AI {
       this.data_handler = (data) => {
          this.makeMove(data);
       }
-      this.py = spawn('python',['./NN/Run.py',cfg]);
+      this.py = spawn('python3',['./NN/Run.py',cfg]);
       this.py.stdout.on('data', this.data_handler);
       this.py.stderr.on('data',function(data){
          console.log(data.toString());
@@ -34,17 +34,14 @@ class AI {
       this.py.stdout.on('data', this.data_handler);
    }
    
-   score(score=null){
-      var score = this.car.travelled - this.car.last_travelled;
-      if(score < 0){
-         score = score * 2;
+   score(score=.5){
+      if(this.car.fromOrigin() > 50 && this.car.travelled > 0){
+         score = 5;
+         this.car.setOrigin();
+         console.log("Reward");
       }
-      this.car.last_travelled = this.car.travelled;
       if(this.car.crashed){
-         score = -1;
-      }
-      if(isNaN(score)){
-         score = 0;
+         score = -10;
       }
       this.py.stdin.write("score " + score +"," + this.car.travelled + "," + this.car.age + '\n');
    }

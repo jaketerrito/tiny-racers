@@ -15,7 +15,7 @@ class Agent:
         self.memory = deque(maxlen=mem_size) # maxlen is number of frames to remember
         self.gamma = 0.5
         self.epsilon = 1
-        self.epsilon_min = 0.01
+        self.epsilon_min = 0.001
         self.epsilon_decay = 0.995
         self.action_size = 9
         self.model = self.build_model(file)
@@ -23,8 +23,7 @@ class Agent:
 
     def build_model(self, file):
         model = Sequential()
-        model.add(Dense(16, activation='linear', input_dim=25))
-        model.add(Dense(12, activation='linear'))
+        model.add(Dense(32, activation='linear', input_dim=25))
         model.add(Dense(self.action_size, activation='linear'))
 
         if file != None:
@@ -40,7 +39,7 @@ class Agent:
         self.memory.append((state, action, reward, next_state))
 
     def replay(self):
-        minibatch = random.sample(self.memory, math.floor(len(self.memory)/4))
+        minibatch = random.sample(self.memory, math.floor(len(self.memory)/2))
         for state, action, reward, next_state in minibatch:
             target_action = reward
             target = self.model.predict(next_state)
@@ -89,9 +88,16 @@ def main(weights):
         if "score" in line:
             reward = float(line.split()[1].split(',')[0])
             sum_reward += reward
-            if reward == -1: # We don't want rewards to carry over from previous crash. so we replay and forget about past attempt
+            if reward == -10: # We don't want rewards to carry over from previous crash. so we replay and forget about past attempt
                 agent.replay()
                 agent.memory.clear()
+                sys.stderr.write("Python: Average reward = " + str(sum_reward/count) + "\n")
+                sys.stderr.flush()
+                count = 0
+                sum_reward = 0
+                batch_count += 1
+            elif count > 1200:
+                agent.replay()
                 sys.stderr.write("Python: Average reward = " + str(sum_reward/count) + "\n")
                 sys.stderr.flush()
                 count = 0

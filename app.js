@@ -65,7 +65,7 @@ gameLoop = async () => {
    var tempList = [];
    var crashed = [];
    carList = gameObjects.updateWorld(cars,objects);
-   io.sockets.emit('update',{'cars':carList});       
+   io.sockets.emit('update',{'cars':carList});
    await AI.score();  
    if(AI.car.crashed){
       cars.splice(cars.indexOf(AI.car),1);
@@ -74,9 +74,6 @@ gameLoop = async () => {
       start = new Date().getTime();
    }
    AI.updateDistances(objects, cars); //automatically make's move based off nn response
-   if(new Date().getTime() - start > 60000){ //automatically resets a
-      AI.car.crash();
-   }
 }
 var AI = new aiObjects.AI(new gameObjects.makeCar(cars,Math.random() * 1000),'None', gameLoop);
 cars.push(AI.car);

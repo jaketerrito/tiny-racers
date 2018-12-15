@@ -156,16 +156,7 @@ class Polygon extends Collidable {
 }
 
 function makeCar(cars,id,socket){
-   var spots = [[300,150]];//[[100,100]]; //300,650]];//[[100,400]];
-   var car = new Car(0,0,id,socket);
-   for(spot of spots){
-      car.x = spot[0];
-      car.y = spot[1];
-      car.setPoints();
-      //if(!car.checkCollision(cars)){
-      return car;
-      //}
-   }
+   var car = new Car(600,150,id,socket);
    return car;
 }
 
@@ -180,7 +171,7 @@ class Car extends Collidable{
             this.y = y;
             //start position
             this.sx = x;
-            this.sy= y;  
+            this.sy = y;  
             this.width = 30;
             this.height = this.width/2;
             this.pointoffsets = [new Point(-this.width/2,-this.height/2+5),new Point(-this.width/2,0),new Point(-this.width/2,this.height/2-5),new Point(0,this.height/2-5),new Point(this.width/2,this.height/2-5),new Point(this.width/2,0),new Point(this.width/2,-this.height/2+5),new Point(0,-this.height+5)];
@@ -194,6 +185,11 @@ class Car extends Collidable{
             this.crashed = false;
             this.travelled = 0;
             this.age = 0;
+      }
+
+      setOrigin(){
+         this.sx = this.x;
+         this.sy = this.y;
       }
 
       fromOrigin(){
