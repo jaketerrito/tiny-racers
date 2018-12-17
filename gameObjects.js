@@ -155,7 +155,7 @@ class Polygon extends Collidable {
       }
 }
 
-function makeCar(cars,id,socket){
+function makeCar(id,socket){
    var car = new Car(600,150,id,socket);
    return car;
 }
@@ -180,7 +180,7 @@ class Car extends Collidable{
             this.vel = 0;
             this.angle = 0;//Math.PI; //client needs
             this.stopped = false;
-            this.MAXVEL = 15*this.speed;
+            this.MAXVEL = 10*this.speed;
             this.MAXTURN = Math.PI / 36 * this.rotspeed;
             this.crashed = false;
             this.travelled = 0;
@@ -203,7 +203,7 @@ class Car extends Collidable{
       }
 
       json(){
-         return {'x':this.x,'y':this.y,'angle':this.angle,'id':this.id};
+         return {'x':this.x,'y':this.y,'angle':this.angle,'id':this.id, 'travelled':this.travelled};
       }
       go(){
       	this.stopped = false;

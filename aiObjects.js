@@ -2,7 +2,7 @@ var gameObjects = require('./gameObjects.js');
 var spawn = require('child_process').spawn;
 
 class AI {
-   constructor(car,cfg='None', callback){
+   constructor(car, callback, cfg='None'){
       this.car = car;
       this.last_travelled = 0;
       this.views = 24;
@@ -34,49 +34,45 @@ class AI {
       this.py.stdout.on('data', this.data_handler);
    }
    
-   score(score=.5){
+   score(score=0){
       if(this.car.fromOrigin() > 50 && this.car.travelled > 0){
-         score = 5;
+         score = 1;
          this.car.setOrigin();
-         console.log("Reward");
       }
       if(this.car.crashed){
-         score = -10;
+         score = -1;
       }
       this.py.stdin.write("score " + score +"," + this.car.travelled + "," + this.car.age + '\n');
    }
 
    makeMove(data){
-      var move = data.toString();
-      if(move == 0){
-         this.car.speedUp();
+      switch(parseInt(data.toString())){
+         case 0:
+            this.car.speedUp();
+            break;
+         case 1:
+            this.car.slowDown();
+            break;
+         case 2:
+            this.car.slowDown();
+            this.car.turnRight(.1); 
+            break;
+         case 3:
+            this.car.turnLeft(.1);
+            this.car.speedUp();
+            break;
+         case 4:
+            this.car.turnRight(.1);
+            this.car.speedUp();
+            break;
+         case 5:
+            this.car.slowDown();
+            this.car.turnLeft(.1);
+            break;
+         default:
+            console.log("ERROR!!!!")
+            exit()
       }
-      if(move == 1){
-         this.car.slowDown(); 
-      }
-      if(move == 2){
-         this.car.turnLeft(.1);
-      }
-      if(move == 3){
-         this.car.turnRight(.1);
-      }
-      if(move == 4){
-         this.car.slowDown();
-         this.car.turnRight(.1); 
-      }
-      if(move == 5){
-         this.car.turnLeft(.1);
-         this.car.speedUp();
-      }
-      if(move == 6){
-         this.car.turnRight(.1);
-         this.car.speedUp();
-      }
-      if(move == 7){
-         this.car.slowDown();
-         this.car.turnLeft(.1);
-      }
-
       this.callback();
    }
 
@@ -103,12 +99,6 @@ class AI {
                   done = true;
                }
             }
-            //Don't check since we are training multiple at the same time
-            /*for(var collidable of cars){
-               if(this.car.id != collidable.id && gameObjects.pointIn(collidable.points,point)){
-                  done = true;
-               }
-            }*/
             this.distances[i] = d/250;
             if(d > 500){
                done = true;

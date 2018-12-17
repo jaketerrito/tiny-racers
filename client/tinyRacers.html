@@ -5,6 +5,7 @@
 <title> Tiny Racers </title>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src = "tinyRacers.js"></script>
 <style>
 		html, body {
@@ -18,6 +19,7 @@
 	</style>
 </head>
 <body>
+<div id="graph" style="width:600px;height:400px;float:right;"></div>
 <canvas id="canvas" style = 'position: absolute; left: 0px; top: 0px;' >
  Your browser does not support the HTML 5 Canvas. 
 </canvas>

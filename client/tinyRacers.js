@@ -4,11 +4,22 @@
 
 var objects = []; 
 var cars = [];
+var lastTime = new Date();
+var best = 0;
 window.addEventListener('load', eventWindowLoaded, false);
 //event listener executes eventWindowLoaded once the canvas window is loaded.
 
 function eventWindowLoaded() {
-	canvasApp();	
+	canvasApp();
+   Plotly.plot(
+      'graph', 
+      [{y: []}],
+      {
+         title: 'Course Progress',
+         xaxis: {title: ''},
+         yaxis: {title: 'Distance Travelled'}
+      }
+     );
 }
 
 function canvasApp(){
@@ -21,9 +32,9 @@ function canvasApp(){
    resizeCanvas();		
 
    function redraw(){
-         context.strokeStyle = 'blue';
-	 context.lineWidth = '5';
-	 context.strokeRect(0, 0, window.innerWidth, window.innerHeight);
+      context.strokeStyle = 'blue';
+      context.lineWidth = '5';
+      context.strokeRect(0, 0, window.innerWidth, window.innerHeight);
    }
 		
    function resizeCanvas() {
@@ -86,6 +97,16 @@ function toCar(list){
    var temp = [];
    for(car of list){
       temp.push(new Car(car.x,car.y,car.angle,car.id));
+      if(car.id == 69 && car.travelled > best){
+         best = car.travelled;
+      }
+      if(new Date() - lastTime > 600000){
+         lastTime = new Date();
+         Plotly.extendTraces('graph', {
+          y: [[best]]
+         }, [0]);
+         best = 0;
+      }
    }
    cars = temp.slice();
 }
