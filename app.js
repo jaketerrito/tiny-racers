@@ -27,7 +27,7 @@ var carList = [];
 io.on('connection',function(socket){
    //console.log("A user connected: " + socket.id);
    socket.on('disconnect',onClientDisconnect);
-   var car = new gameObjects.makeCar(socket.id,socket);
+   var car = new gameObjects.Car(600,150,socket.id,socket);
    cars.push(car);
    carList.push(car.json());
    socket.emit('initialize',{'objects':objectList,'cars':carList});
@@ -68,13 +68,13 @@ gameLoop = async () => {
    await AI.score();  
    if(AI.car.crashed){
       cars.splice(cars.indexOf(AI.car),1);
-      AI.setCar(new gameObjects.makeCar(69,null));
+      AI.setCar(new gameObjects.Car(625,400,69,null));
       cars.push(AI.car);  
       start = new Date().getTime();
    }
    AI.updateDistances(objects, cars); //automatically make's move based off nn response
 }
-var AI = new aiObjects.AI(new gameObjects.makeCar(69,null), gameLoop);
+var AI = new aiObjects.AI(new gameObjects.Car(625,400,69,null), gameLoop, cfg="./weights/agentweights-1545409609.4141471.hdf5");
 cars.push(AI.car);
 //GAMELOOP CALLBACK OFROM updateDistances
 gameLoop();

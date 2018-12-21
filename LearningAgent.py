@@ -47,9 +47,8 @@ class DQNAgent:
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(64, input_dim=self.state_size, activation='relu'))
-        model.add(Dense(128, activation='relu'))
-        model.add(Dense(64, activation='relu'))
+        model.add(Dense(32, input_dim=self.state_size, activation='relu'))
+        model.add(Dense(24, activation='relu'))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss=self._huber_loss,
                       optimizer=RMSprop(lr=0.00025, rho=0.95, epsilon=0.01))
@@ -65,7 +64,7 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
-        if np.random.rand() <= self.epsilon or len(self.memory) < self.min_length:
+        if np.random.rand() <= self.epsilon:
             action =  random.randrange(self.action_size)
         else:
             action = np.argmax(self.model.predict(state)[0])
@@ -89,6 +88,7 @@ class DQNAgent:
             self.training_steps += 1
             if self.training_steps % self.converge_step == 0:
                 self.update_target_model()
+
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -105,30 +105,31 @@ def main(weights):
     reward = None
     action = None
     done = False
-    agent = DQNAgent(25,6)
+    agent = DQNAgent(25,9)
     start_time = time.time()
     if weights != 'None':
-        agent = DQNAgent(25,6) 
+        agent = DQNAgent(25,9) 
         agent.load(weights)
+        agent.epsilon = 0.01
 
     for line in sys.stdin:
-        if agent.training_steps % 1000000 == 0 and agent.training_steps != 0:
-            hrs = (time.time() - start_time) / (1000*60*60)
-            sys.stderr.write("{} million steps in {} hours.".format(agent.training_steps%1000000, hrs))
-            sys.stderr.flush()
         if reward is None:
             reward  = float(line.split()[1].split(',')[0])
         elif state is None:
             state = np.reshape(np.array(json.loads(line[:-1])).flatten(), (1,25))
             action = agent.act(state)
 
-        # expects "score {score}" as final line
+        # expects "score {score}"
         if "score" in line:
             reward = float(line.split()[1].split(',')[0])
             done = False
             if reward == -1: # We don't want rewards to carry over from previous crash. so we replay and forget about past attempt
                 done = True
             if count > 60:
+                if agent.training_steps % 1000000 == 0 and agent.training_steps != 0:
+                    hrs = (time.time() - start_time) / (60*60)
+                    sys.stderr.write("{} million steps in {} hours.".format(agent.training_steps/1000000, hrs))
+                    sys.stderr.flush()
                 agent.replay()
                 count = 0
         else:

@@ -1,7 +1,6 @@
 //Program3
 //CSC 378
 //Jacob Territo
-var tickLength = Math.floor(1000/30);
 function getCar(search,cars){
    for(car of cars){
       if(car.id == search.id){
@@ -89,6 +88,11 @@ function makeMap(objects){
       shape = new Collidable(1);
       shape.points = [new Point(19,219),new Point(47,237),new Point(57,275),new Point(73,309),new Point(122,347),new Point(170,360),new Point(531,359),new Point(558,370),new Point(573,391),new Point(572,404),new Point(558,424),new Point(538,433),new Point(183,431),new Point(142,436),new Point(106,455),new Point(77,482),new Point(56,515),new Point(48,552),new Point(54,592),new Point(74,628),new Point(101,657),new Point(139,673),new Point(178,676),new Point(800,679),new Point(839,673),new Point(875,654),new Point(905,627),new Point(925,594),new Point(930,563),new Point(929,221),new Point(914,181),new Point(887,151),new Point(842,122),new Point(794,114),new Point(651,114),new Point(623,106),new Point(601,85),new Point(548,50),new Point(491,32),new Point(438,44),new Point(411,64),new Point(380,84),new Point(349,110),new Point(352,4),new Point(999,4),new Point(965,698),new Point(46,714),new Point(8,613)];
       objects.push(shape);
+
+      /* corner piece */
+      shape = new Collidable(1);
+      shape.points = [new Point(349,113),new Point(133,108),new Point(73,142),new Point(49,184),new Point(50,236),new Point(0,236),new Point(0,0),new Point(350,0)]
+      objects.push(shape);
 }
 
 function hex_corner(center, size, sides, i){
@@ -155,11 +159,6 @@ class Polygon extends Collidable {
       }
 }
 
-function makeCar(id,socket){
-   var car = new Car(600,150,id,socket);
-   return car;
-}
-
 class Car extends Collidable{
       constructor(x,y,id,socket){
             super(id);
@@ -167,18 +166,17 @@ class Car extends Collidable{
             this.rotspeed = .4;
             this.keyMap = {};
             this.socket = socket;
-            this.x = x;  //client needs
+            this.x = x;
             this.y = y;
-            //start position
-            this.sx = x;
-            this.sy = y;  
+            //visited  
+            this.visited = [[x,y]];
             this.width = 30;
             this.height = this.width/2;
             this.pointoffsets = [new Point(-this.width/2,-this.height/2+5),new Point(-this.width/2,0),new Point(-this.width/2,this.height/2-5),new Point(0,this.height/2-5),new Point(this.width/2,this.height/2-5),new Point(this.width/2,0),new Point(this.width/2,-this.height/2+5),new Point(0,-this.height+5)];
             this.points = [];
             this.setPoints();
             this.vel = 0;
-            this.angle = 0;//Math.PI; //client needs
+            this.angle = Math.random() * Math.PI * 2
             this.stopped = false;
             this.MAXVEL = 10*this.speed;
             this.MAXTURN = Math.PI / 36 * this.rotspeed;
@@ -187,14 +185,20 @@ class Car extends Collidable{
             this.age = 0;
       }
 
-      setOrigin(){
-         this.sx = this.x;
-         this.sy = this.y;
+      visit(){
+         this.visited.push([this.x,this.y]);
+         if(this.visited.length > 10){
+            this.visited = this.visited.slice(-10,-1);
+         }
       }
 
-      fromOrigin(){
-         return Math.sqrt((this.x-this.sx)**2 + (this.y-this.sy)**2);
+      fromVisited(){
+         var distances = []
+         for(var point of this.visited)
+            distances.push(Math.sqrt((this.x-point[0])**2 + (this.y-point[1])**2));
+         return distances;
       }
+
       setPoints(){
          this.points = [];
          for(var point of this.pointoffsets){
@@ -306,7 +310,6 @@ module.exports =  {
    checkKeys: checkKeys,
    Car: Car,
    updateWorld: updateWorld,
-   makeCar: makeCar,
    pointIn: pointIn,
    Point: Point
 }

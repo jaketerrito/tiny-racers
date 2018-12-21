@@ -7,14 +7,16 @@ class AI {
       this.last_travelled = 0;
       this.views = 24;
       this.distances = [];
+      this.max_distance = 1000;
+
       for(var i = 0; i < this.views; i++){
-         this.distances.push(500);
+         this.distances.push(this.max_distance);
       }
       this.callback = callback
       this.data_handler = (data) => {
          this.makeMove(data);
       }
-      this.py = spawn('python3',['./NN/Run.py',cfg]);
+      this.py = spawn('python3',['LearningAgent.py',cfg]);
       this.py.stdout.on('data', this.data_handler);
       this.py.stderr.on('data',function(data){
          console.log(data.toString());
@@ -35,9 +37,9 @@ class AI {
    }
    
    score(score=0){
-      if(this.car.fromOrigin() > 50 && this.car.travelled > 0){
+      if(this.car.fromVisited().filter((x) => {return x < 50}).length == 0 && this.car.travelled > 0){
          score = 1;
-         this.car.setOrigin();
+         this.car.visit();
       }
       if(this.car.crashed){
          score = -1;
@@ -69,6 +71,14 @@ class AI {
             this.car.slowDown();
             this.car.turnLeft(.1);
             break;
+         case 6:
+            this.car.turnLeft(.1);
+            break;
+         case 7:
+            this.car.turnRight(.1);
+            break;
+         case 8:
+            break;
          default:
             console.log("ERROR!!!!")
             exit()
@@ -82,7 +92,7 @@ class AI {
       var step = Math.PI * 2 / this.views;
       for(var i = 0; i < this.views; i++){
          angles.push(angle + step * i);
-         this.distances[i] = 500;
+         this.distances[i] = 1;
       }
       for(var i = 0; i < angles.length; i++){
          var point = new gameObjects.Point(this.car.x, this.car.y);
@@ -99,8 +109,8 @@ class AI {
                   done = true;
                }
             }
-            this.distances[i] = d/250;
-            if(d > 500){
+            this.distances[i] = d/this.max_distance;
+            if(d > this.max_distance){
                done = true;
             }
          }
