@@ -6,17 +6,17 @@ import time
 import keras
 import random
 from keras.models import Sequential
-from keras.layers import Dense, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Conv2D, MaxPooling2D, LSTM, Dense, Flatten
 from keras.optimizers import RMSprop
 from keras import backend as K
 from collections import deque
 import tensorflow as tf
 
-class DQNAgent:
-    def __init__(self, state_size, action_size):
+class DRQNAgent:
+    def __init__(self, state_size, action_size, mem_size):
         self.state_size = state_size
         self.action_size = action_size
+        self.mem_size = mem_size #How far back to look when choosing action
         self.memory = deque(maxlen=900000)
         self.min_length = 500000 # number of purely explorational steps
         self.batch_size = 32 # how many state/action pairs are looked at during each replay
@@ -47,7 +47,7 @@ class DQNAgent:
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
         model = Sequential()
-        model.add(Dense(32, input_dim=self.state_size, activation='relu'))
+        model.add(LSTM(32, input_shape=(self.mem_size, self.state_size)))
         model.add(Dense(24, activation='relu'))
         model.add(Dense(self.action_size, activation='linear'))
         model.compile(loss=self._huber_loss,
@@ -61,6 +61,8 @@ class DQNAgent:
 
 
     def remember(self, state, action, reward, next_state, done):
+        state = np.reshape(state,(1,self.mem_size,self.state_size))
+        next_state = np.reshape(next_state,(1,self.mem_size,self.state_size))
         self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
@@ -98,17 +100,20 @@ class DQNAgent:
 
 
 def main(weights):
+    mem_size =256
     training_freq = 4
     count = 0
     state = None
+    state_sequence = None
     next_state = None
+    next_state_sequence = None
     reward = None
     action = None
     done = False
-    agent = DQNAgent(25,9)
+    agent = DRQNAgent(25, 9, mem_size)
     start_time = time.time()
     if weights != 'None':
-        agent = DQNAgent(25,9) 
+        agent = DRQNAgent(25, 9, mem_size) 
         agent.load(weights)
         agent.epsilon = 0.01
 
@@ -116,8 +121,9 @@ def main(weights):
         if reward is None:
             reward  = float(line.split()[1].split(',')[0])
         elif state is None:
-            state = np.reshape(np.array(json.loads(line[:-1])).flatten(), (1,25))
-            action = agent.act(state)
+            state = np.array(json.loads(line[:-1])).flatten()
+            state_sequence = [state]
+            action = agent.act(np.array(state_sequence))
 
         # expects "score {score}"
         if "score" in line:
@@ -134,10 +140,13 @@ def main(weights):
                 count = 0
         else:
             # line np.array(json.loads(line[:-1]))xpected to be "[0,1,2,....]"
-            next_state = np.reshape(np.array(json.loads(line[:-1])).flatten(), (1,25))
-            agent.remember(state, action, reward, next_state, done)
-            state = next_state
-            action = agent.act(state)
+            next_state = np.array(json.loads(line[:-1])).flatten()
+            next_state_sequence = state_sequence[-(mem_size-1):]
+            next_state_sequence.append(next_state)
+            if(len(state_sequence) == mem_size):
+                agent.remember(np.array(state_sequence), action, reward, np.array(next_state_sequence), done)
+            state_sequence = next_state_sequence
+            action = agent.act(np.array(state_sequence))
             count += 1
 
 if __name__ == '__main__':
