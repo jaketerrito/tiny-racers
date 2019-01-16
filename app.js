@@ -74,7 +74,7 @@ gameLoop = async () => {
    }
    AI.updateDistances(objects, cars); //automatically make's move based off nn response
 }
-var AI = new aiObjects.AI(new gameObjects.Car(625,400,69,null), gameLoop, cfg="./weights/agentweights-1545409609.4141471.hdf5");
+var AI = new aiObjects.AI(new gameObjects.Car(625,400,69,null), gameLoop);
 cars.push(AI.car);
 //GAMELOOP CALLBACK OFROM updateDistances
 gameLoop();
