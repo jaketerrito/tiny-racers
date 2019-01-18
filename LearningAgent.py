@@ -18,7 +18,7 @@ class DRQNAgent:
         self.action_size = action_size
         self.mem_size = mem_size #How far back to look when choosing action
         self.memory = deque(maxlen=900000)
-        self.min_length = 500000 # number of purely explorational steps
+        self.min_length = 300 # number of purely explorational steps
         self.batch_size = 32 # how many state/action pairs are looked at during each replay
         self.gamma = 0.99    # discount rate
         self.epsilon = 1.0  # exploration rate
@@ -61,8 +61,6 @@ class DRQNAgent:
 
 
     def remember(self, state, action, reward, next_state, done):
-        state = np.reshape(state,(1,self.mem_size,self.state_size))
-        next_state = np.reshape(next_state,(1,self.mem_size,self.state_size))
         self.memory.append((state, action, reward, next_state, done))
 
     def act(self, state):
@@ -74,19 +72,29 @@ class DRQNAgent:
         sys.stdout.flush()
         return action
 
+    def recall(self, index, state):
+        state_sequence = list(self.memory)[index-self.mem_size:index]
+        state_sequence = np.array((list(zip(*state_sequence))[0]))
+        state_sequence = np.reshape(state_sequence,(1,self.mem_size,self.state_size))
+        return state_sequence
+
     def replay(self):
         if len(self.memory) < self.min_length:
             return
 
-        minibatch = random.sample(self.memory, self.batch_size)
-        for state, action, reward, next_state, done in minibatch:
-            target = self.model.predict(state)  
+        minibatch = random.sample(list(enumerate(self.memory)), self.batch_size)
+        for index, (state, action, reward, next_state, done) in minibatch:
+            if index < self.mem_size:
+                continue
+            state_sequence = self.recall(index, state)
+            next_state_sequence = self.recall(index, next_state)
+            target = self.model.predict(state_sequence)  
             if done:
                 target[0][action] = reward
             else:
-                t = self.target_model.predict(next_state)[0]
+                t = self.target_model.predict(next_state_sequence)[0]
                 target[0][action] = reward + self.gamma * np.amax(t)
-            self.model.fit(state, target, epochs=1, verbose=0)
+            self.model.fit(state_sequence, target, epochs=1, verbose=0)
             self.training_steps += 1
             if self.training_steps % self.converge_step == 0:
                 self.update_target_model()
@@ -101,6 +109,8 @@ class DRQNAgent:
 
 def main(weights):
     mem_size =256
+    state_size = 25
+    action_size = 9
     training_freq = 4
     count = 0
     state = None
@@ -110,10 +120,10 @@ def main(weights):
     reward = None
     action = None
     done = False
-    agent = DRQNAgent(25, 9, mem_size)
+    agent = DRQNAgent(state_size, action_size, mem_size)
     start_time = time.time()
     if weights != 'None':
-        agent = DRQNAgent(25, 9, mem_size) 
+        agent = DRQNAgent(state_size, action_size, mem_size) 
         agent.load(weights)
         agent.epsilon = 0.01
 
@@ -122,7 +132,7 @@ def main(weights):
             reward  = float(line.split()[1].split(',')[0])
         elif state is None:
             state = np.array(json.loads(line[:-1])).flatten()
-            state_sequence = [state]
+            state_sequence = [state] * mem_size
             action = agent.act(np.array(state_sequence))
 
         # expects "score {score}"
@@ -141,12 +151,11 @@ def main(weights):
         else:
             # line np.array(json.loads(line[:-1]))xpected to be "[0,1,2,....]"
             next_state = np.array(json.loads(line[:-1])).flatten()
-            next_state_sequence = state_sequence[-(mem_size-1):]
+            next_state_sequence = state_sequence[1:]
             next_state_sequence.append(next_state)
-            if(len(state_sequence) == mem_size):
-                agent.remember(np.array(state_sequence), action, reward, np.array(next_state_sequence), done)
+            agent.remember(state, action, reward, next_state, done)
             state_sequence = next_state_sequence
-            action = agent.act(np.array(state_sequence))
+            action = agent.act(np.reshape(np.array(state_sequence),(1,mem_size,state_size)))
             count += 1
 
 if __name__ == '__main__':
