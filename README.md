@@ -45,3 +45,5 @@ Fitness function blah blah
 Took a while, led to overfit, no left turns
 Changed up starting weights to cast wider search net, random starting directions (so they have to turn right and left!)
 Here is how it went. Throw in some charts
+
+Checkout the branches with Qlearning and even a DRQN
